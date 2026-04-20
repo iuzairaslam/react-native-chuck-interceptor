@@ -5,6 +5,7 @@ declare const require: (moduleName: string) => unknown;
 
 type SafeAreaContextModule = {
   SafeAreaView: React.ComponentType<ViewProps>;
+  SafeAreaProvider?: React.ComponentType<{ children: React.ReactNode }>;
 };
 
 function loadSafeAreaContext(): SafeAreaContextModule | null {
@@ -43,5 +44,11 @@ export function ChuckerSafeAreaView(props: ViewProps) {
       ]}
     />
   );
+}
+
+export function ChuckerSafeAreaProvider({ children }: { children: React.ReactNode }) {
+  const mod = loadSafeAreaContext();
+  if (mod?.SafeAreaProvider) return <mod.SafeAreaProvider>{children}</mod.SafeAreaProvider>;
+  return <>{children}</>;
 }
 

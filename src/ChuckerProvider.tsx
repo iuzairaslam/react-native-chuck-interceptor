@@ -11,6 +11,7 @@ import { ChuckerListScreen } from './screens/ChuckerListScreen';
 import { RequestDetailScreen } from './screens/RequestDetailScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { ChuckerLocalNotifications } from './localNotifications';
+import { ChuckerSafeAreaProvider } from './components/SafeArea';
 
 // ─── Internal navigation stack ────────────────────────────────────────────────
 
@@ -53,24 +54,26 @@ function ChuckerInspector({ visible, onClose }: InspectorProps) {
       onRequestClose={handleClose}
       statusBarTranslucent
     >
-      <View style={styles.modal}>
-        {screen === 'list' && (
-          <ChuckerListScreen
-            onSelectRequest={handleSelectRequest}
-            onOpenSettings={handleOpenSettings}
-            onClose={handleClose}
-          />
-        )}
-        {screen === 'detail' && selectedRequest && (
-          <RequestDetailScreen
-            request={selectedRequest}
-            onBack={handleBack}
-          />
-        )}
-        {screen === 'settings' && (
-          <SettingsScreen onBack={handleBack} />
-        )}
-      </View>
+      <ChuckerSafeAreaProvider>
+        <View style={styles.modal}>
+          {screen === 'list' && (
+            <ChuckerListScreen
+              onSelectRequest={handleSelectRequest}
+              onOpenSettings={handleOpenSettings}
+              onClose={handleClose}
+            />
+          )}
+          {screen === 'detail' && selectedRequest && (
+            <RequestDetailScreen
+              request={selectedRequest}
+              onBack={handleBack}
+            />
+          )}
+          {screen === 'settings' && (
+            <SettingsScreen onBack={handleBack} />
+          )}
+        </View>
+      </ChuckerSafeAreaProvider>
     </Modal>
   );
 }
