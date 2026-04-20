@@ -15,7 +15,9 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "lint": "eslint \"src/**/*.{ts,tsx}\""
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "publish:npm": "npm publish --registry=https://registry.npmjs.org --access public",
+    "publish:github": "npm publish --registry=https://npm.pkg.github.com"
   },
   "keywords": [
     "react-native",
@@ -59,7 +61,8 @@
     "url": "https://github.com/iuzairaslam/react-native-chuck-interceptor.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "homepage": "https://github.com/iuzairaslam/react-native-chuck-interceptor#readme",
   "bugs": {

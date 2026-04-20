@@ -50,17 +50,7 @@ Inspired by [Chucker Android](https://github.com/ChuckerTeam/chucker) and [chuck
 
 ## Installation
 
-### Option A — GitHub Packages (npm registry)
-
-This package can be published/installed via **GitHub Packages**.
-
-**1) Authenticate (one-time on your machine):**
-
-```bash
-npm login --scope=@iuzairaslam --auth-type=legacy --registry=https://npm.pkg.github.com
-```
-
-**2) Install:**
+### Option A — npmjs.org (public)
 
 ```bash
 npm install @iuzairaslam/react-native-chuck-interceptor
@@ -68,17 +58,20 @@ npm install @iuzairaslam/react-native-chuck-interceptor
 yarn add @iuzairaslam/react-native-chuck-interceptor
 ```
 
-> If you prefer using `~/.npmrc`, GitHub recommends adding:
+### Option B — GitHub Packages (npm registry)
+
+Use this if you want to consume the package from **GitHub Packages** (private/internal distribution).
+
+```bash
+npm login --scope=@iuzairaslam --auth-type=legacy --registry=https://npm.pkg.github.com
+npm install @iuzairaslam/react-native-chuck-interceptor
+```
+
+> If you prefer using `~/.npmrc`, GitHub recommends:
 >
 > `//npm.pkg.github.com/:_authToken=TOKEN`
 
-### Option B — npm/yarn (npmjs.org)
-
-```bash
-npm install react-native-chuck-interceptor
-# or
-yarn add react-native-chuck-interceptor
-```
+### Option C — Local plugin (file: reference)
 
 ## Quick Start
 
@@ -99,7 +92,7 @@ export default function App() {
 
 That’s it. Chucker will automatically intercept all `fetch` and `XHR` calls (and therefore most Axios traffic).
 
-### Option B — Local plugin (file: reference)
+### Option C — Local plugin (file: reference)
 
 Use this when you have the package as a local folder on your machine (e.g. a monorepo or local dev copy).
 
@@ -412,9 +405,13 @@ React Native network inspector, React Native HTTP inspector, Axios interceptor, 
 
 ---
 
-## Publishing (GitHub Packages)
+## Publishing
 
 ```bash
+# npmjs.org (public)
+npm run publish:npm
+
+# GitHub Packages
 npm login --scope=@iuzairaslam --auth-type=legacy --registry=https://npm.pkg.github.com
-npm publish
+npm run publish:github
 ```
