@@ -451,6 +451,32 @@ function createAxiosInterceptors() {
       if (id) {
         const pending     = pendingMap.get(id);
         const completedAt = Date.now();
+
+        // Axios puts server responses on `error.response` for 4xx/5xx
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const resp = (error as any)?.response;
+        const respStatus: number | null = resp?.status ?? null;
+        const respStatusText: string | null = resp?.statusText ?? null;
+        const respHeaders: Record<string, string> =
+          resp?.headers ? headersToObject(resp.headers as Record<string, string>) : {};
+
+        let respBodyStr: string | null = null;
+        try {
+          if (resp && 'data' in resp) {
+            const data = resp.data;
+            respBodyStr = typeof data === 'string' ? data : JSON.stringify(data);
+          }
+        } catch {
+          respBodyStr = null;
+        }
+
+        const contentType =
+          respHeaders['content-type'] ||
+          respHeaders['Content-Type'] ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (resp?.headers as any)?.['content-type'] ||
+          null;
+
         state.onUpdate?.(id, {
           completedAt,
           duration: pending ? completedAt - pending.startedAt : null,
@@ -458,7 +484,12 @@ function createAxiosInterceptors() {
           error:    (error instanceof Error ? error.message : String(error)),
           // Include response info if available (e.g. 4xx/5xx)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          responseCode: (error as any)?.response?.status || null,
+          responseCode: respStatus,
+          responseMessage: respStatusText,
+          responseHeaders: respHeaders,
+          responseBody: respBodyStr ? parseBody(respBodyStr) : null,
+          responseBodySize: respBodyStr ? byteSize(respBodyStr) : 0,
+          responseContentType: contentType,
         });
         pendingMap.delete(id);
       }
