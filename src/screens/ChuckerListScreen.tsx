@@ -21,6 +21,7 @@ import { useChuckerContext } from '../context';
 import { RequestItem } from '../components/RequestItem';
 import { filterRequests } from '../utils';
 import { ChuckerSafeAreaView } from '../components/SafeArea';
+import { useChuckerPalette } from '../theme';
 
 interface ChuckerListScreenProps {
   onSelectRequest: (request: ChuckerRequest) => void;
@@ -35,7 +36,8 @@ export function ChuckerListScreen({
   onOpenSettings,
   onClose,
 }: ChuckerListScreenProps) {
-  const { requests, clearRequests } = useChuckerContext();
+  const { requests, clearRequests, settings } = useChuckerContext();
+  const palette = useChuckerPalette(settings);
   const [search,     setSearch]     = useState('');
   const [filter,     setFilter]     = useState<FilterType>('all');
 
@@ -78,31 +80,31 @@ export function ChuckerListScreen({
   ];
 
   return (
-    <ChuckerSafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent={false} />
+    <ChuckerSafeAreaView style={[styles.safe, { backgroundColor: palette.bg }]}>
+      <StatusBar barStyle="dark-content" backgroundColor={palette.surface} translucent={false} />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: palette.surface, borderBottomColor: palette.border }]}>
         <View style={styles.headerTitle}>
-          <Text style={styles.title}>Chucker</Text>
-          <Text style={styles.subtitle}>{requests.length}</Text>
+          <Text style={[styles.title, { color: palette.text }]}>Chucker</Text>
+          <Text style={[styles.subtitle, { color: palette.subtleText }]}>{requests.length}</Text>
         </View>
         <View style={styles.headerRight}>
           <TouchableOpacity onPress={handleClear} style={styles.headerBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Text style={styles.headerBtnText}>Clear</Text>
+            <Text style={[styles.headerBtnText, { color: palette.mutedText }]}>Clear</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onOpenSettings} style={styles.headerBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Text style={styles.headerBtnText}>Settings</Text>
+            <Text style={[styles.headerBtnText, { color: palette.mutedText }]}>Settings</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onClose} style={styles.headerBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Text style={styles.headerBtnText}>Close</Text>
+            <Text style={[styles.headerBtnText, { color: palette.mutedText }]}>Close</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Search bar */}
-      <View style={styles.searchBar}>
-        <Text style={styles.searchIcon}>Search</Text>
+      <View style={[styles.searchBar, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        <Text style={[styles.searchIcon, { color: palette.subtleText }]}>Search</Text>
         <TextInput
           style={styles.searchInput}
           value={search}
@@ -120,10 +122,18 @@ export function ChuckerListScreen({
         {FILTERS.map((f) => (
           <TouchableOpacity
             key={f.key}
-            style={[styles.chip, filter === f.key && styles.chipActive]}
+            style={[
+              styles.chip,
+              { backgroundColor: palette.surface, borderColor: palette.border },
+              filter === f.key && { backgroundColor: palette.primary, borderColor: palette.primary },
+            ]}
             onPress={() => setFilter(f.key)}
           >
-            <Text style={[styles.chipText, filter === f.key && styles.chipTextActive]}>
+            <Text style={[
+              styles.chipText,
+              { color: palette.subtleText },
+              filter === f.key && styles.chipTextActive,
+            ]}>
               {f.label}
             </Text>
           </TouchableOpacity>
@@ -133,10 +143,10 @@ export function ChuckerListScreen({
       {/* List */}
       {filtered.length === 0 ? (
         <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>
+          <Text style={[styles.emptyTitle, { color: palette.mutedText }]}>
             {requests.length === 0 ? 'No requests yet' : 'No matching requests'}
           </Text>
-          <Text style={styles.emptySubtitle}>
+          <Text style={[styles.emptySubtitle, { color: palette.subtleText }]}>
             {requests.length === 0
               ? 'Make a network call to see it here'
               : 'Try changing your search or filter'}

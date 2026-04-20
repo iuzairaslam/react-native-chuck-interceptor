@@ -32,6 +32,7 @@ interface InterceptorState {
   onRequest: OnRequestCallback | null;
   onUpdate:  OnUpdateCallback  | null;
   settings:  ChuckerSettings;
+  shouldCaptureExtra: ((info: { url: string; method: string }) => boolean) | null;
   isPatched: boolean;
   originalFetch: typeof fetch | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,7 +50,10 @@ const state: InterceptorState = {
     showNotification:     true,
     notificationDuration: 3000,
     hostFilter:           [],
+    theme:                'auto',
+    primaryColor:         '#D97757',
   },
+  shouldCaptureExtra: null,
   isPatched:       false,
   originalFetch:   null,
   originalXHROpen: null,
@@ -58,10 +62,18 @@ const state: InterceptorState = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function shouldCapture(url: string): boolean {
+function shouldCapture(url: string, method: string): boolean {
   const { hostFilter } = state.settings;
   if (!hostFilter || hostFilter.length === 0) return true;
-  return hostFilter.some((h) => url.includes(h));
+  const hostMatch = hostFilter.some((h) => url.includes(h));
+  if (!hostMatch) return false;
+  if (!state.shouldCaptureExtra) return true;
+  try {
+    return state.shouldCaptureExtra({ url, method });
+  } catch {
+    // never break the app due to user predicate
+    return true;
+  }
 }
 
 // Best-effort dedupe to prevent the same underlying network call being captured
@@ -102,14 +114,14 @@ function patchFetch(): void {
         ? input.toString()
         : (input as Request).url;
 
-    if (!shouldCapture(url)) {
-      return state.originalFetch!(input, init);
-    }
-
     const method = (
       init?.method ||
       (input instanceof Request ? input.method : 'GET')
     ).toUpperCase();
+
+    if (!shouldCapture(url, method)) {
+      return state.originalFetch!(input, init);
+    }
 
     const requestHeaders = headersToObject(
       (init?.headers as Record<string, string>) ||
@@ -252,7 +264,7 @@ function patchXHR(): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   OriginalXHR.prototype.send = function (this: any, body?: Document | XMLHttpRequestBodyInit | null) {
     const meta = this[META];
-    if (!meta || !shouldCapture(meta.url)) {
+    if (!meta || !shouldCapture(meta.url, meta.method)) {
       return state.originalXHRSend.call(this, body);
     }
 
@@ -373,7 +385,7 @@ function createAxiosInterceptors() {
     onFulfilled: (config: Record<string, unknown>) => {
       const url    = String(config.url || '');
       const method = String(config.method || 'GET').toUpperCase();
-      if (!shouldCapture(url)) return config;
+      if (!shouldCapture(url, method)) return config;
 
       // Mark so fetch/XHR patches can skip capturing the same request again.
       // Axios v1 may use `AxiosHeaders` (has `.set()`); older versions use plain objects.
@@ -510,10 +522,12 @@ export const ChuckerInterceptor = {
     onRequest: OnRequestCallback,
     onUpdate:  OnUpdateCallback,
     settings:  ChuckerSettings,
+    options?: { shouldCapture?: (info: { url: string; method: string }) => boolean },
   ): void {
     state.onRequest = onRequest;
     state.onUpdate  = onUpdate;
     state.settings  = settings;
+    state.shouldCaptureExtra = options?.shouldCapture ?? null;
 
     if (state.isPatched) return;
     state.isPatched = true;

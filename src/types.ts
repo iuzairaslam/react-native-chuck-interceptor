@@ -104,6 +104,12 @@ export interface ChuckerSettings {
 
   /** Filter requests by host (empty = show all) */
   hostFilter: string[];
+
+  /** UI color scheme. Default: 'auto' */
+  theme: ChuckerTheme;
+
+  /** Primary accent color. Default: '#D97757' */
+  primaryColor: string;
 }
 
 export type ChuckerTheme = 'light' | 'dark' | 'auto';
@@ -132,6 +138,15 @@ export interface ChuckerConfig {
 
   /** UI color scheme. Default: 'auto' */
   theme?: ChuckerTheme;
+
+  /** Primary accent color. Default: '#D97757' */
+  primaryColor?: string;
+
+  /**
+   * Optional extra capture filter. Runs after `hostFilter`.
+   * Return false to skip capturing the request.
+   */
+  shouldCapture?: (info: { url: string; method: string }) => boolean;
 }
 
 export interface ChuckerContextValue {

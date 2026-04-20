@@ -183,6 +183,12 @@ Optionally, Chucker can show **local notifications** for each request (iOS + And
     notificationDuration: 3000,  // (legacy) previously used by the in-app toast
     maxRequests:          200,    // Max stored requests (default: 200)
     hostFilter:           [],     // Only capture URLs containing these strings (default: all)
+    theme:                'auto', // 'light' | 'dark' | 'auto'
+    primaryColor:         '#D97757',
+    shouldCapture: ({ url, method }) => {
+      // return false to skip capturing
+      return !url.includes('/health') && method !== 'OPTIONS';
+    },
   }}
 >
   <YourApp />

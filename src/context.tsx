@@ -23,6 +23,8 @@ const DEFAULT_SETTINGS: ChuckerSettings = {
   showNotification:     true,
   notificationDuration: 3000,
   hostFilter:           [],
+  theme:                'auto',
+  primaryColor:         '#D97757',
 };
 
 // ─── State & Reducer ──────────────────────────────────────────────────────────
@@ -109,6 +111,8 @@ export function ChuckerStateProvider({
     showNotification:     config.showNotification     ?? DEFAULT_SETTINGS.showNotification,
     notificationDuration: config.notificationDuration ?? DEFAULT_SETTINGS.notificationDuration,
     hostFilter:           config.hostFilter           ?? DEFAULT_SETTINGS.hostFilter,
+    theme:                config.theme                ?? DEFAULT_SETTINGS.theme,
+    primaryColor:         config.primaryColor         ?? DEFAULT_SETTINGS.primaryColor,
   };
 
   const [state, dispatch] = useReducer(reducer, {
@@ -172,6 +176,7 @@ export function ChuckerStateProvider({
         }
       },
       state.settings,
+      { shouldCapture: config.shouldCapture },
     );
 
     return () => {
