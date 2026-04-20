@@ -53,9 +53,9 @@ Inspired by [Chucker Android](https://github.com/ChuckerTeam/chucker) and [chuck
 ### Option A — npmjs.org (public)
 
 ```bash
-npm install react-native-chuck-interceptor
+npm install @iuzairaslam/react-native-chuck-interceptor
 # or
-yarn add react-native-chuck-interceptor
+yarn add @iuzairaslam/react-native-chuck-interceptor
 ```
 
 ### Option B — GitHub Packages (npm registry)
