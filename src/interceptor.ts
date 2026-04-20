@@ -17,6 +17,14 @@ import {
 // so the underlying fetch/XHR patch can skip capturing the same call twice.
 const CHUCKER_CAPTURED_HEADER = 'x-chucker-captured';
 
+function hasChuckerCapturedHeader(headers: Record<string, string> | null | undefined): boolean {
+  if (!headers) return false;
+  for (const k of Object.keys(headers)) {
+    if (k.toLowerCase() === CHUCKER_CAPTURED_HEADER) return headers[k] === '1';
+  }
+  return false;
+}
+
 type OnRequestCallback = (request: ChuckerRequest) => void;
 type OnUpdateCallback  = (id: string, update: Partial<ChuckerRequest>) => void;
 
@@ -249,7 +257,7 @@ function patchXHR(): void {
     }
 
     // If axios interceptors already captured this call, skip XHR-layer capture.
-    if (meta.requestHeaders?.[CHUCKER_CAPTURED_HEADER] === '1') {
+    if (hasChuckerCapturedHeader(meta.requestHeaders)) {
       return state.originalXHRSend.call(this, body);
     }
 
@@ -368,11 +376,18 @@ function createAxiosInterceptors() {
       if (!shouldCapture(url)) return config;
 
       // Mark so fetch/XHR patches can skip capturing the same request again.
+      // Axios v1 may use `AxiosHeaders` (has `.set()`); older versions use plain objects.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const headers = ((config as any).headers || {}) as Record<string, string>;
-      headers[CHUCKER_CAPTURED_HEADER] = '1';
+      const hdrs: any = (config as any).headers || {};
+      if (typeof hdrs.set === 'function') {
+        hdrs.set(CHUCKER_CAPTURED_HEADER, '1');
+        hdrs.set('X-Chucker-Captured', '1');
+      } else if (typeof hdrs === 'object' && hdrs) {
+        hdrs[CHUCKER_CAPTURED_HEADER] = '1';
+        hdrs['X-Chucker-Captured'] = '1';
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (config as any).headers = headers;
+      (config as any).headers = hdrs;
 
       const { host, path, queryString, protocol } = parseUrl(url);
       const id        = generateId();
