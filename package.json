@@ -1,6 +1,6 @@
 {
   "name": "@iuzairaslam/react-native-chuck-interceptor",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Network inspector for React Native (fetch, XHR, Axios). View requests, responses, headers, JSON and FormData in an in-app dashboard — inspired by Chucker.",
   "main": "src/index.ts",
   "module": "src/index.ts",
