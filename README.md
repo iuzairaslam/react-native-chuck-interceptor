@@ -370,6 +370,10 @@ MIT. See `LICENSE`.
 
 ---
 
+## Author
+
+- **Muhammad Uzair Aslam** — [@iuzairaslam](https://github.com/iuzairaslam/)
+
 ## SEO keywords
 
 React Native network inspector, React Native HTTP inspector, Axios interceptor, fetch interceptor, XHR interceptor, API debugger, request response viewer, in-app devtools.

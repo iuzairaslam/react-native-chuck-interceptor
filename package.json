@@ -35,7 +35,10 @@
     "ios",
     "android"
   ],
-  "author": "",
+  "author": {
+    "name": "Muhammad Uzair Aslam",
+    "url": "https://github.com/iuzairaslam/"
+  },
   "license": "MIT",
   "peerDependencies": {
     "react": ">=17.0.0",
