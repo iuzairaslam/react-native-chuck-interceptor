@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StatusBar, View, ViewProps } from 'react-native';
+import { Platform, SafeAreaView, StatusBar, View, ViewProps } from 'react-native';
 
 declare const require: (moduleName: string) => unknown;
 
@@ -18,11 +18,17 @@ function loadSafeAreaContext(): SafeAreaContextModule | null {
 
 /**
  * Prefer react-native-safe-area-context when available.
- * Falls back to a plain View (no SafeArea) to avoid deprecated RN SafeAreaView warning.
+ * Falls back to:
+ * - iOS: react-native SafeAreaView (to correctly respect notches/home indicator)
+ * - Android: plain View with StatusBar padding (avoid deprecated SafeAreaView warning noise)
  */
 export function ChuckerSafeAreaView(props: ViewProps) {
   const mod = loadSafeAreaContext();
   if (mod?.SafeAreaView) return <mod.SafeAreaView {...props} />;
+
+  if (Platform.OS === 'ios') {
+    return <SafeAreaView {...props} />;
+  }
 
   const extraAndroidPadding =
     Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0;
