@@ -53,6 +53,7 @@ export function getPalette(settings: Pick<ChuckerSettings, 'theme' | 'primaryCol
 
 export function useChuckerPalette(settings: Pick<ChuckerSettings, 'theme' | 'primaryColor'>): ChuckerPalette {
   const system = useColorScheme();
-  return useMemo(() => getPalette(settings, system), [settings.primaryColor, settings.theme, system]);
+  const systemMode = system === 'dark' || system === 'light' ? system : null;
+  return useMemo(() => getPalette(settings, systemMode), [settings.primaryColor, settings.theme, systemMode]);
 }
 
