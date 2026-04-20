@@ -41,9 +41,9 @@ export function TabBar({ tabs, activeKey, onChange }: TabBarProps) {
 const styles = StyleSheet.create({
   container: {
     flexDirection:   'row',
-    backgroundColor: '#0D0D1A',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#1E2748',
+    borderBottomColor: '#E7E7EE',
     paddingHorizontal: 8,
     paddingTop: 4,
     paddingBottom: 6,
@@ -55,15 +55,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   tabActive: {
-    backgroundColor: '#1A1A2E',
+    backgroundColor: '#F7F7FA',
   },
   label: {
     fontSize:   13,
-    color:      '#546E7A',
+    color:      '#6B6B7A',
     fontWeight: '500',
   },
   labelActive: {
-    color:      '#E0E0E0',
+    color:      '#12121A',
     fontWeight: '700',
   },
 });

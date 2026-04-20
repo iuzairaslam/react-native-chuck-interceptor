@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection:   'row',
     alignItems:      'stretch',
-    backgroundColor: '#1A1A2E',
+    backgroundColor: '#FFFFFF',
     marginHorizontal: 12,
     marginVertical:   5,
     borderRadius:    10,
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     shadowOpacity:   0.15,
     shadowRadius:    3,
     borderWidth: 1,
-    borderColor: '#1E2748',
+    borderColor: '#E7E7EE',
   },
   body: {
     flex:            1,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    backgroundColor: 'rgba(13, 13, 26, 0.35)',
+    backgroundColor: '#F7F7FA',
   },
   statusCode: {
     fontSize:   14,
@@ -146,22 +146,22 @@ const styles = StyleSheet.create({
   },
   duration: {
     fontSize: 11,
-    color:    '#78909C',
+    color:    '#8A8A99',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   time: {
     fontSize:  11,
-    color:     '#546E7A',
+    color:     '#8A8A99',
     marginLeft: 'auto',
   },
   host: {
     fontSize:   13,
-    color:      '#B0BEC5',
+    color:      '#12121A',
     fontWeight: '500',
   },
   path: {
     fontSize:   12,
-    color:      '#78909C',
+    color:      '#6B6B7A',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   error: {
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   },
   chevron: {
     fontSize:    20,
-    color:       '#37474F',
+    color:       '#C2C2CC',
     alignSelf:   'center',
     paddingRight: 12,
   },

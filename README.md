@@ -230,6 +230,10 @@ api.interceptors.response.use(
 );
 ```
 
+> **Note about duplicates**: If you use `axiosInterceptors()` **and** your Axios instance uses an XHR/fetch adapter underneath, the same request can be seen twice unless one layer is disabled.
+>
+> This library automatically prevents that by tagging Axios requests internally so the fetch/XHR patch skips them.
+
 ---
 
 ## Open the Inspector Programmatically

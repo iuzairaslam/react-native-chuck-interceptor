@@ -23,14 +23,14 @@ interface JsonNodeProps {
 
 const INDENT = 16;
 const COLORS = {
-  key:        '#89DDFF',
-  string:     '#C3E88D',
-  number:     '#F78C6C',
-  boolean:    '#FF5370',
-  null:       '#B2CCD6',
-  bracket:    '#FFCB6B',
-  collapsed:  '#82AAFF',
-  toggle:     '#546E7A',
+  key:        '#303047',
+  string:     '#1F7A43',
+  number:     '#B45309',
+  boolean:    '#B42318',
+  null:       '#8A8A99',
+  bracket:    '#6B6B7A',
+  collapsed:  '#6B6B7A',
+  toggle:     '#8A8A99',
 };
 
 function JsonNode({ value, keyName, depth, isLast }: JsonNodeProps) {
@@ -153,6 +153,7 @@ export function JsonTreeView({ json }: JsonTreeViewProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   tree: {
     padding: 12,
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
     fontStyle:  'italic',
   },
   punctuation: {
-    color:      '#546E7A',
+    color:      '#8A8A99',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     fontSize:   13,
   },
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   rawText: {
-    color:      '#CFD8DC',
+    color:      '#303047',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     fontSize:   13,
     padding:    12,

@@ -13,6 +13,10 @@ import {
   byteSize,
 } from './utils';
 
+// When using the built-in axios interceptors, we mark the request with this header
+// so the underlying fetch/XHR patch can skip capturing the same call twice.
+const CHUCKER_CAPTURED_HEADER = 'x-chucker-captured';
+
 type OnRequestCallback = (request: ChuckerRequest) => void;
 type OnUpdateCallback  = (id: string, update: Partial<ChuckerRequest>) => void;
 
@@ -105,6 +109,11 @@ function patchFetch(): void {
           ? headersToObject(input.headers)
           : {}),
     );
+
+    // If axios interceptors already captured this call, skip fetch-layer capture.
+    if (requestHeaders[CHUCKER_CAPTURED_HEADER] === '1') {
+      return state.originalFetch!(input, init);
+    }
 
     let requestBodyStr: string | null = null;
     if (init?.body) {
@@ -239,6 +248,11 @@ function patchXHR(): void {
       return state.originalXHRSend.call(this, body);
     }
 
+    // If axios interceptors already captured this call, skip XHR-layer capture.
+    if (meta.requestHeaders?.[CHUCKER_CAPTURED_HEADER] === '1') {
+      return state.originalXHRSend.call(this, body);
+    }
+
     const { host, path, queryString, protocol } = parseUrl(meta.url);
     const id        = generateId();
     const startedAt = Date.now();
@@ -352,6 +366,13 @@ function createAxiosInterceptors() {
       const url    = String(config.url || '');
       const method = String(config.method || 'GET').toUpperCase();
       if (!shouldCapture(url)) return config;
+
+      // Mark so fetch/XHR patches can skip capturing the same request again.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const headers = ((config as any).headers || {}) as Record<string, string>;
+      headers[CHUCKER_CAPTURED_HEADER] = '1';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (config as any).headers = headers;
 
       const { host, path, queryString, protocol } = parseUrl(url);
       const id        = generateId();

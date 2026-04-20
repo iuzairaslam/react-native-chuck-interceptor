@@ -5,7 +5,6 @@
 import React, { useState } from 'react';
 import {
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   StatusBar,
@@ -16,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import { useChuckerContext } from '../context';
+import { ChuckerSafeAreaView } from '../components/SafeArea';
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -34,8 +34,8 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#0D0D1A" translucent={false} />
+    <ChuckerSafeAreaView style={styles.safe}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent={false} />
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
@@ -161,7 +161,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </ChuckerSafeAreaView>
   );
 }
 
@@ -210,17 +210,16 @@ function SettingRow({
 const styles = StyleSheet.create({
   safe: {
     flex:            1,
-    backgroundColor: '#0D0D1A',
+    backgroundColor: '#F7F7FA',
   },
   header: {
     flexDirection:     'row',
     alignItems:        'center',
-    paddingTop:        Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
-    paddingVertical:   12,
-    paddingHorizontal: 16,
-    backgroundColor:   '#0D0D1A',
+    paddingVertical:   10,
+    paddingHorizontal: 14,
+    backgroundColor:   '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#1E2748',
+    borderBottomColor: '#E7E7EE',
   },
   backBtn: {},
   backText: {
@@ -233,7 +232,7 @@ const styles = StyleSheet.create({
     flex:       1,
     fontSize:   17,
     fontWeight: '700',
-    color:      '#E0E0E0',
+    color:      '#12121A',
     textAlign:  'center',
   },
   content: {
@@ -248,22 +247,22 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex:            1,
-    backgroundColor: '#111128',
+    backgroundColor: '#FFFFFF',
     borderRadius:    10,
     padding:         14,
     alignItems:      'center',
     borderWidth: 1,
-    borderColor: '#1E2748',
+    borderColor: '#E7E7EE',
     gap: 2,
   },
   statValue: {
     fontSize:   22,
     fontWeight: '700',
-    color:      '#B0BEC5',
+    color:      '#12121A',
   },
   statLabel: {
     fontSize:  11,
-    color:     '#546E7A',
+    color:     '#8A8A99',
     marginTop: 2,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
@@ -278,12 +277,12 @@ const styles = StyleSheet.create({
     marginBottom:  2,
   },
   settingCard: {
-    backgroundColor: '#111128',
+    backgroundColor: '#FFFFFF',
     borderRadius:    10,
     padding:         14,
     gap:             8,
     borderWidth: 1,
-    borderColor: '#1E2748',
+    borderColor: '#E7E7EE',
   },
   settingLabelRow: {
     flexDirection: 'row',
@@ -292,12 +291,12 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize:   15,
-    color:      '#E0E0E0',
+    color:      '#12121A',
     fontWeight: '500',
   },
   settingDesc: {
     fontSize:  12,
-    color:     '#546E7A',
+    color:     '#6B6B7A',
     marginTop: 2,
   },
   stepperRow: {
@@ -309,17 +308,17 @@ const styles = StyleSheet.create({
     flex:              1,
     paddingVertical:    8,
     borderRadius:      8,
-    backgroundColor:   '#1A1A2E',
+    backgroundColor:   '#F7F7FA',
     alignItems:        'center',
     borderWidth:       1,
-    borderColor:       '#1E2748',
+    borderColor:       '#E7E7EE',
   },
   stepBtnActive: {
     backgroundColor: '#D97757',
     borderColor:     '#D97757',
   },
   stepBtnText: {
-    color:    '#546E7A',
+    color:    '#6B6B7A',
     fontSize: 13,
   },
   stepBtnTextActive: {
@@ -327,14 +326,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   filterInput: {
-    backgroundColor:   '#0D0D1A',
+    backgroundColor:   '#FFFFFF',
     borderRadius:       8,
     padding:            10,
-    color:              '#B0BEC5',
+    color:              '#303047',
     fontSize:           13,
     fontFamily:         Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     borderWidth:        1,
-    borderColor:        '#1E2748',
+    borderColor:        '#E7E7EE',
   },
   clearBtn: {
     backgroundColor: '#1A0A0A',

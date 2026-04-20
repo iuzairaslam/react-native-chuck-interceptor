@@ -6,7 +6,6 @@
 import React, { useState } from 'react';
 import {
   Platform,
-  SafeAreaView,
   ScrollView,
   Share,
   StatusBar,
@@ -18,6 +17,7 @@ import {
 import { ChuckerRequest } from '../types';
 import { TabBar, TabItem } from '../components/TabBar';
 import { JsonTreeView } from '../components/JsonTreeView';
+import { ChuckerSafeAreaView } from '../components/SafeArea';
 import {
   formatBytes,
   formatDuration,
@@ -59,8 +59,8 @@ export function RequestDetailScreen({ request, onBack }: RequestDetailScreenProp
     : statusColor(statusCode);
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#0D0D1A" translucent={false} />
+    <ChuckerSafeAreaView style={styles.safe}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent={false} />
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
@@ -105,7 +105,7 @@ export function RequestDetailScreen({ request, onBack }: RequestDetailScreenProp
         {activeTab === 'response' && <BodyTab body={request.responseBody} label="Response Body" />}
         {activeTab === 'headers'  && <HeadersTab request={request} />}
       </View>
-    </SafeAreaView>
+    </ChuckerSafeAreaView>
   );
 }
 
@@ -314,17 +314,16 @@ function buildShareText(r: ChuckerRequest): string {
 const styles = StyleSheet.create({
   safe: {
     flex:            1,
-    backgroundColor: '#0D0D1A',
+    backgroundColor: '#F7F7FA',
   },
   header: {
     flexDirection:     'row',
     alignItems:        'center',
-    paddingTop:        Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
-    paddingVertical:   12,
-    paddingHorizontal: 16,
-    backgroundColor:   '#0D0D1A',
+    paddingVertical:   10,
+    paddingHorizontal: 14,
+    backgroundColor:   '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#1E2748',
+    borderBottomColor: '#E7E7EE',
     gap:               8,
   },
   backBtn: {
@@ -339,7 +338,7 @@ const styles = StyleSheet.create({
     flex:       1,
     fontSize:   14,
     fontWeight: '600',
-    color:      '#B0BEC5',
+    color:      '#303047',
     textAlign:  'center',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
@@ -357,10 +356,10 @@ const styles = StyleSheet.create({
     alignItems:        'center',
     paddingHorizontal: 16,
     paddingVertical:   10,
-    backgroundColor:   '#111128',
+    backgroundColor:   '#FFFFFF',
     gap:               10,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E2748',
+    borderBottomColor: '#E7E7EE',
   },
   methodBadge: {
     borderRadius:      5,
@@ -384,11 +383,11 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    backgroundColor: 'rgba(13, 13, 26, 0.35)',
+    backgroundColor: '#F7F7FA',
   },
   duration: {
     fontSize:  13,
-    color:     '#546E7A',
+    color:     '#8A8A99',
     marginLeft: 'auto',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
@@ -414,10 +413,12 @@ const styles = StyleSheet.create({
     marginBottom:  8,
   },
   sectionBody: {
-    backgroundColor: '#111128',
+    backgroundColor: '#FFFFFF',
     borderRadius:    10,
     padding:         12,
     gap:             8,
+    borderWidth: 1,
+    borderColor: '#E7E7EE',
   },
   row: {
     flexDirection: 'row',
@@ -425,18 +426,18 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     width:      110,
-    color:      '#546E7A',
+    color:      '#6B6B7A',
     fontSize:   13,
     flexShrink: 0,
   },
   rowValue: {
     flex:       1,
-    color:      '#B0BEC5',
+    color:      '#303047',
     fontSize:   13,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   monoText: {
-    color:      '#B0BEC5',
+    color:      '#303047',
     fontSize:   13,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     lineHeight: 20,
@@ -447,18 +448,18 @@ const styles = StyleSheet.create({
   },
   headerName: {
     fontSize:   12,
-    color:      '#89DDFF',
+    color:      '#303047',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     fontWeight: '600',
   },
   headerValue: {
     fontSize:   12,
-    color:      '#B0BEC5',
+    color:      '#6B6B7A',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     paddingLeft: 8,
   },
   noHeaders: {
-    color:     '#37474F',
+    color:     '#8A8A99',
     fontSize:  13,
     fontStyle: 'italic',
   },
@@ -472,12 +473,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   emptyBodyText: {
-    color:    '#37474F',
+    color:    '#8A8A99',
     fontSize: 15,
   },
   bodyContainer: {
     flex:            1,
-    backgroundColor: '#090915',
+    backgroundColor: '#F7F7FA',
   },
   modeRow: {
     flexDirection:     'row',
@@ -485,20 +486,21 @@ const styles = StyleSheet.create({
     paddingVertical:   8,
     gap:               6,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E2748',
+    borderBottomColor: '#E7E7EE',
+    backgroundColor: '#FFFFFF',
   },
   modeBtn: {
     paddingHorizontal: 14,
     paddingVertical:    5,
     borderRadius:      6,
-    backgroundColor:   '#1A1A2E',
+    backgroundColor:   '#F7F7FA',
   },
   modeBtnActive: {
     backgroundColor: '#D97757',
   },
   modeBtnText: {
     fontSize:   13,
-    color:      '#546E7A',
+    color:      '#6B6B7A',
     fontWeight: '500',
   },
   modeBtnTextActive: {
@@ -508,7 +510,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rawBody: {
-    color:      '#B0BEC5',
+    color:      '#303047',
     fontSize:   12,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     padding:    12,

@@ -10,7 +10,6 @@ import {
   ListRenderItemInfo,
   Platform,
   StatusBar,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
@@ -21,6 +20,7 @@ import { ChuckerRequest } from '../types';
 import { useChuckerContext } from '../context';
 import { RequestItem } from '../components/RequestItem';
 import { filterRequests } from '../utils';
+import { ChuckerSafeAreaView } from '../components/SafeArea';
 
 interface ChuckerListScreenProps {
   onSelectRequest: (request: ChuckerRequest) => void;
@@ -78,17 +78,14 @@ export function ChuckerListScreen({
   ];
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#0D0D1A" translucent={false} />
+    <ChuckerSafeAreaView style={styles.safe}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent={false} />
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={onClose} style={styles.headerBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={styles.headerBtnText}>Close</Text>
-        </TouchableOpacity>
         <View style={styles.headerTitle}>
           <Text style={styles.title}>Chucker</Text>
-          <Text style={styles.subtitle}>{requests.length} requests</Text>
+          <Text style={styles.subtitle}>{requests.length}</Text>
         </View>
         <View style={styles.headerRight}>
           <TouchableOpacity onPress={handleClear} style={styles.headerBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -96,6 +93,9 @@ export function ChuckerListScreen({
           </TouchableOpacity>
           <TouchableOpacity onPress={onOpenSettings} style={styles.headerBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <Text style={styles.headerBtnText}>Settings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onClose} style={styles.headerBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Text style={styles.headerBtnText}>Close</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -154,58 +154,63 @@ export function ChuckerListScreen({
           ItemSeparatorComponent={null}
         />
       )}
-    </SafeAreaView>
+    </ChuckerSafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: {
     flex:            1,
-    backgroundColor: '#0D0D1A',
+    backgroundColor: '#F7F7FA',
   },
   header: {
     flexDirection:   'row',
     alignItems:      'center',
-    paddingTop:      Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#0D0D1A',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#1E2748',
+    borderBottomColor: '#E7E7EE',
     gap:             8,
   },
   headerBtn: {
     paddingVertical: 6,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: '#F7F7FA',
+    borderWidth: 1,
+    borderColor: '#E7E7EE',
   },
   headerBtnText: {
-    fontSize: 13,
-    color:    '#B0BEC5',
+    fontSize: 12,
+    color:    '#303047',
     fontWeight: '600',
   },
   headerTitle: {
     flex:      1,
-    alignItems: 'center',
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
   },
   title: {
-    fontSize:   17,
+    fontSize:   16,
     fontWeight: '700',
-    color:      '#E0E0E0',
+    color:      '#12121A',
     letterSpacing: 0.3,
   },
   subtitle: {
     fontSize: 12,
-    color:    '#546E7A',
-    marginTop: 1,
+    color:    '#8A8A99',
+    fontWeight: '600',
   },
   headerRight: {
     flexDirection: 'row',
-    gap:           4,
+    gap:           6,
   },
   searchBar: {
     flexDirection:   'row',
     alignItems:      'center',
-    backgroundColor: '#1A1A2E',
+    backgroundColor: '#FFFFFF',
     marginHorizontal: 12,
     marginTop:       12,
     marginBottom:    8,
@@ -213,17 +218,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     height:          42,
     borderWidth: 1,
-    borderColor: '#1E2748',
+    borderColor: '#E7E7EE',
   },
   searchIcon: {
     fontSize:    12,
     marginRight: 10,
-    color: '#546E7A',
+    color: '#8A8A99',
     fontWeight: '600',
   },
   searchInput: {
     flex:      1,
-    color:     '#E0E0E0',
+    color:     '#12121A',
     fontSize:  14,
     padding:   0,
   },
@@ -237,9 +242,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical:    5,
     borderRadius:      20,
-    backgroundColor:   '#1A1A2E',
+    backgroundColor:   '#FFFFFF',
     borderWidth:       1,
-    borderColor:       '#1E2748',
+    borderColor:       '#E7E7EE',
   },
   chipActive: {
     backgroundColor: '#D97757',
@@ -247,7 +252,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize:   12,
-    color:      '#546E7A',
+    color:      '#6B6B7A',
     fontWeight: '500',
   },
   chipTextActive: {
@@ -266,12 +271,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize:     18,
     fontWeight:   '600',
-    color:        '#546E7A',
+    color:        '#303047',
     marginBottom: 6,
   },
   emptySubtitle: {
     fontSize: 13,
-    color:    '#37474F',
+    color:    '#6B6B7A',
     textAlign: 'center',
     paddingHorizontal: 40,
   },
