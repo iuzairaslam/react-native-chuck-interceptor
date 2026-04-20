@@ -50,7 +50,29 @@ Inspired by [Chucker Android](https://github.com/ChuckerTeam/chucker) and [chuck
 
 ## Installation
 
-### Option A — npm/yarn (published package)
+### Option A — GitHub Packages (npm registry)
+
+This package can be published/installed via **GitHub Packages**.
+
+**1) Authenticate (one-time on your machine):**
+
+```bash
+npm login --scope=@iuzairaslam --auth-type=legacy --registry=https://npm.pkg.github.com
+```
+
+**2) Install:**
+
+```bash
+npm install @iuzairaslam/react-native-chuck-interceptor
+# or
+yarn add @iuzairaslam/react-native-chuck-interceptor
+```
+
+> If you prefer using `~/.npmrc`, GitHub recommends adding:
+>
+> `//npm.pkg.github.com/:_authToken=TOKEN`
+
+### Option B — npm/yarn (npmjs.org)
 
 ```bash
 npm install react-native-chuck-interceptor
@@ -387,3 +409,12 @@ MIT. See `LICENSE`.
 ## SEO keywords
 
 React Native network inspector, React Native HTTP inspector, Axios interceptor, fetch interceptor, XHR interceptor, API debugger, request response viewer, in-app devtools.
+
+---
+
+## Publishing (GitHub Packages)
+
+```bash
+npm login --scope=@iuzairaslam --auth-type=legacy --registry=https://npm.pkg.github.com
+npm publish
+```
