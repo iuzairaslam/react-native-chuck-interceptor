@@ -1,56 +1,50 @@
-# react-native-chuck-interceptor
+# React Native Chuck Interceptor
 
-**Network inspector for React Native** — intercept `fetch`, `XMLHttpRequest`, and Axios to inspect **requests, responses, headers, JSON, and FormData** in a clean in-app dashboard.
+An **in-app network inspector for React Native**. It captures `fetch`, `XMLHttpRequest`, and Axios traffic so you can review **requests, responses, headers, JSON, and FormData** inside your app—without any native setup.
 
-Inspired by [Chucker Android](https://github.com/ChuckerTeam/chucker) and [chucker_flutter](https://pub.dev/packages/chucker_flutter).
+## Table of contents
 
----
+- [Why this library?](#why-this-library)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [Axios integration (recommended)](#axios-integration-recommended)
+- [Open the inspector programmatically](#open-the-inspector-programmatically)
+- [Context API](#context-api)
+- [Types](#types)
+- [Platform notes](#platform-notes)
+- [License](#license)
 
 ## Why this library?
 
-- **Debug APIs faster**: see what your app actually sent/received (including FormData uploads).
-- **Zero native setup**: pure JS/TS package (works on iOS + Android).
-- **Production safe by default**: enabled only in `__DEV__` unless you opt in.
+- **Debug API calls faster**: see exactly what your app sent and received (including multipart `FormData` uploads).
+- **Zero native setup**: a pure JS/TS library that works on **iOS + Android**.
+- **Safe defaults**: enabled only in `__DEV__` unless you explicitly opt in for release builds.
 
 ## Features
 
 - **Automatic interception** of `fetch` and `XMLHttpRequest` (covers Axios, Apollo, Relay, etc.)
-- **In-app dashboard** — list view, detail view, headers, JSON tree
-- **FormData support** — view multipart/form-data fields and file metadata
-- **Interactive JSON tree** with collapsible nodes
-- **Search & filter** requests by URL, method, or status code
-- **Share** any request/response via the native share sheet
-- **Settings screen** — max requests, host filter, debug-only mode, notification duration
-- **Persistent storage** via AsyncStorage (optional — gracefully degrades)
-- **Debug-only by default** — zero overhead in production
-- **Zero native modules** — pure JS/TS, works on iOS and Android
-
----
-
-## Screenshots
-
-| Request List | Request Detail | JSON Tree | Settings |
-|---|---|---|---|
-| Dark themed list with method badges and status codes | Full detail with tabs | Interactive collapsible tree | Toggles and stepper controls |
-
----
+- **In-app inspector UI** (list + request detail + response detail + headers)
+- **FormData support** (multipart fields + file metadata)
+- **Search and filters** (URL, method, status)
+- **Share** a captured request/response from the device
+- **Optional persistence** via AsyncStorage (gracefully falls back to in-memory)
+- **Optional local notifications** when `@notifee/react-native` is installed and permissions are granted
 
 ## Requirements
 
-| Requirement | Version |
-|---|---|
-| React Native | **≥ 0.71** (uses `gap` flexbox — added in RN 0.71) |
-| React | ≥ 17.0 |
-| iOS | ≥ 13.0 |
-| Android | API ≥ 21 |
+- **React Native**: \(\ge\) 0.71
+- **React**: \(\ge\) 17
+- **iOS**: \(\ge\) 13
+- **Android**: API \(\ge\) 21
 
-> **Zero native modules** — no `pod install` changes, no `MainApplication.java` edits, no `npx react-native link`.
-
----
+> **No native modules**: no `pod install` changes, no Android application edits, and no linking steps.
 
 ## Installation
 
-### Option A — npmjs.org (public)
+### npm (recommended)
 
 ```bash
 npm install @iuzairaslam/react-native-chuck-interceptor
@@ -58,28 +52,22 @@ npm install @iuzairaslam/react-native-chuck-interceptor
 yarn add @iuzairaslam/react-native-chuck-interceptor
 ```
 
-### Option B — GitHub Packages (npm registry)
+### GitHub Packages (optional)
 
-Use this if you want to consume the package from **GitHub Packages** (private/internal distribution).
+Use this only if you consume the package from **GitHub Packages**.
 
 ```bash
 npm login --scope=@iuzairaslam --auth-type=legacy --registry=https://npm.pkg.github.com
 npm install @iuzairaslam/react-native-chuck-interceptor
 ```
 
-> If you prefer using `~/.npmrc`, GitHub recommends:
->
-> `//npm.pkg.github.com/:_authToken=TOKEN`
+## Quick start
 
-### Option C — Local plugin (file: reference)
-
-## Quick Start
-
-Wrap your root component with `<ChuckerProvider>`:
+Wrap your app with `ChuckerProvider`:
 
 ```tsx
 // App.tsx
-import { ChuckerProvider } from 'react-native-chuck-interceptor';
+import { ChuckerProvider } from '@iuzairaslam/react-native-chuck-interceptor';
 
 export default function App() {
   return (
@@ -90,127 +78,37 @@ export default function App() {
 }
 ```
 
-That’s it. Chucker will automatically intercept all `fetch` and `XHR` calls (and therefore most Axios traffic).
+That’s it—requests made through `fetch` or XHR (and most Axios setups) will be captured automatically.
 
-### Option C — Local plugin (file: reference)
+### Optional: persistent storage
 
-Use this when you have the package as a local folder on your machine (e.g. a monorepo or local dev copy).
-
-**1. Add the dependency in your app's `package.json`:**
-
-```json
-{
-  "dependencies": {
-    "react-native-chuck-interceptor": "file:../react-native-chuck-interceptor"
-  }
-}
-```
-
-**2. Install:**
-
-```bash
-npm install
-# or
-yarn install
-```
-
-**3. Configure Metro** — copy `metro.config.example.js` from the plugin folder into your app as `metro.config.js` (or merge with your existing one):
-
-```js
-// metro.config.js  (in your RN app)
-const path = require('path');
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
-
-const chuckerRoot = path.resolve(__dirname, '../react-native-chuck-interceptor');
-
-module.exports = mergeConfig(getDefaultConfig(__dirname), {
-  watchFolders: [chuckerRoot],
-  resolver: {
-    nodeModulesPaths: [
-      path.resolve(__dirname, 'node_modules'),
-      path.resolve(chuckerRoot, 'node_modules'),
-    ],
-    sourceExts: ['tsx', 'ts', 'jsx', 'js', 'json'],
-  },
-});
-```
-
-> **Why?** Metro needs `watchFolders` to detect changes in the local package, and `nodeModulesPaths` to ensure both your app and the plugin share the same `react` / `react-native` instances (prevents duplicate module errors).
-
-**4. Clear caches and run:**
-
-```bash
-# iOS
-npx react-native start --reset-cache
-npx react-native run-ios
-
-# Android
-npx react-native start --reset-cache
-npx react-native run-android
-```
-
----
-
-### Optional: Persistent Storage
-
-For requests to persist across app restarts, install AsyncStorage:
+To persist requests across app restarts, install AsyncStorage:
 
 ```bash
 npm install @react-native-async-storage/async-storage
-npx pod-install  # iOS only
+npx pod-install # iOS only
 ```
-
-> Without AsyncStorage the plugin works perfectly — requests are just held in memory for the current session.
-
----
-
-## Quick Start
-
-Wrap your root component with `<ChuckerProvider>`:
-
-```tsx
-// App.tsx
-import { ChuckerProvider } from 'react-native-chuck-interceptor';
-
-export default function App() {
-  return (
-    <ChuckerProvider>
-      <YourApp />
-    </ChuckerProvider>
-  );
-}
-```
-
-That's it. Chucker will automatically intercept all `fetch` and `XHR` calls.
-
-Optionally, Chucker can show **local notifications** for each request (iOS + Android) when `@notifee/react-native` is installed and notification permission is granted. Tapping a notification opens the inspector.
-
----
 
 ## Configuration
 
 ```tsx
 <ChuckerProvider
   config={{
-    showOnlyInDebug:      true,   // Only active in __DEV__ builds (default: true)
-    showNotification:     true,   // Show local notification per request (default: true, requires @notifee/react-native)
-    requestNotificationPermissionOnStart: true, // Request notification permission on app start (default: true)
-    notificationDuration: 3000,  // (legacy) previously used by the in-app toast
-    maxRequests:          200,    // Max stored requests (default: 200)
-    hostFilter:           [],     // Only capture URLs containing these strings (default: all)
-    theme:                'auto', // 'light' | 'dark' | 'auto'
-    primaryColor:         '#D97757',
-    shouldCapture: ({ url, method }) => {
-      // return false to skip capturing
-      return !url.includes('/health') && method !== 'OPTIONS';
-    },
+    showOnlyInDebug: true, // default: true
+    showNotification: true, // default: true (requires @notifee/react-native)
+    requestNotificationPermissionOnStart: true, // default: true
+    maxRequests: 200, // default: 200
+    hostFilter: [], // default: capture all
+    theme: 'auto', // 'light' | 'dark' | 'auto'
+    primaryColor: '#D97757',
+    shouldCapture: ({ url, method }) => !url.includes('/health') && method !== 'OPTIONS',
   }}
 >
   <YourApp />
 </ChuckerProvider>
 ```
 
-### Show in Release builds
+### Enable in release builds
 
 ```tsx
 <ChuckerProvider config={{ showOnlyInDebug: false }}>
@@ -221,46 +119,32 @@ Optionally, Chucker can show **local notifications** for each request (iOS + And
 ### Host filtering
 
 ```tsx
-<ChuckerProvider
-  config={{
-    hostFilter: ['api.myapp.com', 'staging.myapp.com'],
-  }}
->
+<ChuckerProvider config={{ hostFilter: ['api.myapp.com', 'staging.myapp.com'] }}>
   <YourApp />
 </ChuckerProvider>
 ```
 
----
+## Axios integration (recommended)
 
-## Usage with Axios (recommended)
-
-Chucker patches global `fetch`/`XHR`, so it already captures Axios requests. But for **more accurate timing** (before Axios adapters transform the request), you can use the dedicated axios interceptors:
+Chucker already captures Axios requests because Axios ultimately uses `fetch` or XHR. If you want **more accurate timings**, you can also attach the dedicated Axios interceptors:
 
 ```tsx
 import axios from 'axios';
-import { ChuckerInterceptor } from 'react-native-chuck-interceptor';
+import { ChuckerInterceptor } from '@iuzairaslam/react-native-chuck-interceptor';
 
 const api = axios.create({ baseURL: 'https://api.example.com' });
-
 const chucker = ChuckerInterceptor.axiosInterceptors();
 
 api.interceptors.request.use(chucker.request.onFulfilled);
-api.interceptors.response.use(
-  chucker.response.onFulfilled,
-  chucker.response.onRejected,
-);
+api.interceptors.response.use(chucker.response.onFulfilled, chucker.response.onRejected);
 ```
 
-> **Note about duplicates**: If you use `axiosInterceptors()` **and** your Axios instance uses an XHR/fetch adapter underneath, the same request can be seen twice unless one layer is disabled.
->
-> This library automatically prevents that by tagging Axios requests internally so the fetch/XHR patch skips them.
+> If you use Axios interceptors *and* your Axios adapter still uses XHR/fetch internally, a request could appear twice. This library tags Axios requests internally so the global fetch/XHR patches can skip duplicates.
 
----
-
-## Open the Inspector Programmatically
+## Open the inspector programmatically
 
 ```tsx
-import { useChuckerContext } from 'react-native-chuck-interceptor';
+import { useChuckerContext } from '@iuzairaslam/react-native-chuck-interceptor';
 
 function DebugButton() {
   const { openChucker } = useChuckerContext();
@@ -268,150 +152,54 @@ function DebugButton() {
 }
 ```
 
----
-
 ## Context API
-
-Inside any component wrapped by `<ChuckerProvider>`:
 
 ```tsx
 const {
-  requests,        // ChuckerRequest[]  — all captured requests
-  settings,        // ChuckerSettings   — current settings
-  isVisible,       // boolean           — inspector is open
-  openChucker,     // () => void        — open the inspector
-  closeChucker,    // () => void        — close the inspector
-  clearRequests,   // () => void        — clear all stored requests
-  updateSettings,  // (s: Partial<ChuckerSettings>) => void
+  requests,
+  settings,
+  isVisible,
+  openChucker,
+  closeChucker,
+  clearRequests,
+  updateSettings,
 } = useChuckerContext();
 ```
 
----
-
-## ChuckerRequest Type
+## Types
 
 ```ts
 interface ChuckerRequest {
-  id:                  string;
-  method:              string;           // 'GET' | 'POST' | ...
-  url:                 string;
-  host:                string;
-  path:                string;
-  queryString:         string;
-  protocol:            string;           // 'http' | 'https'
-  requestHeaders:      Record<string, string>;
-  requestBody:         string | null;
-  requestBodySize:     number;           // bytes
-  responseCode:        number | null;
-  responseMessage:     string | null;
-  responseHeaders:     Record<string, string>;
-  responseBody:        string | null;
-  responseBodySize:    number;
+  id: string;
+  method: string;
+  url: string;
+  host: string;
+  path: string;
+  queryString: string;
+  protocol: string;
+  requestHeaders: Record<string, string>;
+  requestBody: string | null;
+  requestBodySize: number;
+  responseCode: number | null;
+  responseMessage: string | null;
+  responseHeaders: Record<string, string>;
+  responseBody: string | null;
+  responseBodySize: number;
   responseContentType: string | null;
-  startedAt:           number;           // Unix ms
-  completedAt:         number | null;
-  duration:            number | null;    // ms
-  status:              'pending' | 'complete' | 'failed';
-  error:               string | null;
+  startedAt: number;
+  completedAt: number | null;
+  duration: number | null;
+  status: 'pending' | 'complete' | 'failed';
+  error: string | null;
 }
 ```
 
----
+## Platform notes
 
-## Inspector UI
-
-### List Screen
-- All requests sorted newest-first
-- Method badge (color-coded), status code, duration, timestamp
-- Search by URL / method / status
-- Filter chips: All · 2xx · 4xx · 5xx · Failed
-- Pull-to-clear button
-
-### Detail Screen — 4 Tabs
-
-| Tab | Content |
-|-----|---------|
-| **Overview** | URL, timing, status, sizes |
-| **Request** | Request body — JSON tree or raw |
-| **Response** | Response body — JSON tree or raw |
-| **Headers** | All request & response headers |
-
-- Tap any JSON body to switch between interactive **Tree** and **Raw** view
-- **Share** button exports the full request as plain text
-
-### Settings Screen
-- Toggle notifications
-- Toggle debug-only mode
-- Max requests slider (50 / 100 / 200 / 500)
-- Host filter input
-- Notification duration (1s / 2s / 3s / 5s)
-- Clear all requests
-
----
-
-## Platform Notes
-
-| Feature | iOS | Android |
-|---------|-----|---------|
-| Fetch interception | ✅ | ✅ |
-| XHR interception | ✅ | ✅ |
-| Axios interception | ✅ | ✅ |
-| Floating notifications | ✅ | ✅ |
-| Full inspector UI | ✅ | ✅ |
-| Share sheet | ✅ | ✅ |
-| Persistent storage | ✅ (AsyncStorage) | ✅ (AsyncStorage) |
-
----
-
-## Architecture
-
-```
-react-native-chuck-interceptor/
-├── src/
-│   ├── index.ts              # Public exports
-│   ├── types.ts              # TypeScript types
-│   ├── utils.ts              # Formatters, parsers, helpers
-│   ├── storage.ts            # AsyncStorage wrapper
-│   ├── interceptor.ts        # fetch + XHR + axios interceptors
-│   ├── context.tsx           # React context + useReducer state
-│   ├── ChuckerProvider.tsx   # Root provider + modal navigator
-│   ├── components/
-│   │   ├── Notification.tsx  # Floating animated toast
-│   │   ├── RequestItem.tsx   # List item card
-│   │   ├── JsonTreeView.tsx  # Collapsible JSON tree
-│   │   └── TabBar.tsx        # Internal tab bar
-│   └── screens/
-│       ├── ChuckerListScreen.tsx     # Main list + search + filter
-│       ├── RequestDetailScreen.tsx   # Detail tabs (overview / request / response / headers)
-│       └── SettingsScreen.tsx        # Settings panel
-└── package.json
-```
-
----
+- Works on **iOS** and **Android**
+- Optional persistence requires `@react-native-async-storage/async-storage`
+- Optional notifications require `@notifee/react-native`
 
 ## License
 
 MIT. See `LICENSE`.
-
----
-
-## Author
-
-- **Muhammad Uzair Aslam** — [@iuzairaslam](https://github.com/iuzairaslam/)
-
-## SEO keywords
-
-React Native network inspector, React Native HTTP inspector, Axios interceptor, fetch interceptor, XHR interceptor, API debugger, request response viewer, in-app devtools.
-
----
-
-## Publishing
-
-```bash
-# npmjs.org (public)
-npm run publish:npm
-
-# GitHub Packages
-npm login --scope=@iuzairaslam --auth-type=legacy --registry=https://npm.pkg.github.com
-npm run publish:github
-```
