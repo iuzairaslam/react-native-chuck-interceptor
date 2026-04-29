@@ -5,6 +5,8 @@
 
 import React, { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useChuckerContext } from '../context';
+import { ChuckerPalette, useChuckerPalette } from '../theme';
 
 type JsonValue =
   | string
@@ -19,6 +21,7 @@ interface JsonNodeProps {
   keyName?:    string;
   depth:       number;
   isLast:      boolean;
+  palette: ChuckerPalette;
 }
 
 const INDENT = 16;
@@ -33,7 +36,7 @@ const COLORS = {
   toggle:     '#8A8A99',
 };
 
-function JsonNode({ value, keyName, depth, isLast }: JsonNodeProps) {
+function JsonNode({ value, keyName, depth, isLast, palette }: JsonNodeProps) {
   const [collapsed, setCollapsed] = useState(depth >= 2);
   const isObject  = typeof value === 'object' && value !== null && !Array.isArray(value);
   const isArray   = Array.isArray(value);
@@ -55,19 +58,19 @@ function JsonNode({ value, keyName, depth, isLast }: JsonNodeProps) {
           activeOpacity={0.7}
           style={[styles.row, { paddingLeft: indent }]}
         >
-          <Text style={styles.toggle}>{collapsed ? '▶' : '▼'} </Text>
+          <Text style={[styles.toggle, { color: palette.subtleText }]}>{collapsed ? '▶' : '▼'} </Text>
           {keyName !== undefined && (
-            <Text style={styles.key}>"{keyName}": </Text>
+            <Text style={[styles.key, { color: palette.mutedText }]}>"{keyName}": </Text>
           )}
-          <Text style={styles.bracket}>{open}</Text>
+          <Text style={[styles.bracket, { color: palette.mutedText }]}>{open}</Text>
           {collapsed && (
-            <Text style={styles.collapsed}>
+            <Text style={[styles.collapsed, { color: palette.subtleText }]}>
               {' '}
               {count} {count === 1 ? 'item' : 'items'}
             </Text>
           )}
-          <Text style={styles.bracket}>{collapsed ? close : ''}</Text>
-          {collapsed && <Text style={styles.punctuation}>{comma}</Text>}
+          <Text style={[styles.bracket, { color: palette.mutedText }]}>{collapsed ? close : ''}</Text>
+          {collapsed && <Text style={[styles.punctuation, { color: palette.subtleText }]}>{comma}</Text>}
         </TouchableOpacity>
 
         {!collapsed && (
@@ -80,6 +83,7 @@ function JsonNode({ value, keyName, depth, isLast }: JsonNodeProps) {
                     value={(value as { [key: string]: JsonValue })[k]}
                     depth={depth + 1}
                     isLast={i === keys.length - 1}
+                    palette={palette}
                   />
                 ))
               : items.map((v, i) => (
@@ -88,11 +92,12 @@ function JsonNode({ value, keyName, depth, isLast }: JsonNodeProps) {
                     value={v}
                     depth={depth + 1}
                     isLast={i === items.length - 1}
+                    palette={palette}
                   />
                 ))}
             <View style={[styles.row, { paddingLeft: indent }]}>
-              <Text style={styles.bracket}>{close}</Text>
-              <Text style={styles.punctuation}>{comma}</Text>
+              <Text style={[styles.bracket, { color: palette.mutedText }]}>{close}</Text>
+              <Text style={[styles.punctuation, { color: palette.subtleText }]}>{comma}</Text>
             </View>
           </View>
         )}
@@ -115,10 +120,10 @@ function JsonNode({ value, keyName, depth, isLast }: JsonNodeProps) {
   return (
     <View style={[styles.row, { paddingLeft: indent }]}>
       {keyName !== undefined && (
-        <Text style={styles.key}>"{keyName}": </Text>
+        <Text style={[styles.key, { color: palette.mutedText }]}>"{keyName}": </Text>
       )}
       {valueEl}
-      <Text style={styles.punctuation}>{comma}</Text>
+      <Text style={[styles.punctuation, { color: palette.subtleText }]}>{comma}</Text>
     </View>
   );
 }
@@ -128,22 +133,24 @@ interface JsonTreeViewProps {
 }
 
 export function JsonTreeView({ json }: JsonTreeViewProps) {
+  const { settings } = useChuckerContext();
+  const palette = useChuckerPalette(settings);
   let parsed: JsonValue;
   try {
     parsed = JSON.parse(json);
   } catch {
     return (
       <ScrollView horizontal>
-        <Text style={styles.rawText}>{json}</Text>
+        <Text style={[styles.rawText, { color: palette.mutedText }]}>{json}</Text>
       </ScrollView>
     );
   }
 
   return (
-    <ScrollView style={styles.container} horizontal={false}>
+    <ScrollView style={[styles.container, { backgroundColor: palette.surface }]} horizontal={false}>
       <ScrollView horizontal>
         <View style={styles.tree}>
-          <JsonNode value={parsed} depth={0} isLast />
+          <JsonNode value={parsed} depth={0} isLast palette={palette} />
         </View>
       </ScrollView>
     </ScrollView>

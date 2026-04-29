@@ -18,6 +18,8 @@ import {
   statusColor,
   truncate,
 } from '../utils';
+import { useChuckerContext } from '../context';
+import { useChuckerPalette } from '../theme';
 
 interface RequestItemProps {
   request: ChuckerRequest;
@@ -25,6 +27,8 @@ interface RequestItemProps {
 }
 
 export function RequestItem({ request, onPress }: RequestItemProps) {
+  const { settings } = useChuckerContext();
+  const palette = useChuckerPalette(settings);
   const isPending = request.status === 'pending';
   const isFailed  = request.status === 'failed';
 
@@ -42,7 +46,7 @@ export function RequestItem({ request, onPress }: RequestItemProps) {
 
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={[styles.container, { backgroundColor: palette.surface, borderColor: palette.border }]}
       onPress={() => onPress(request)}
       activeOpacity={0.75}
     >
@@ -53,26 +57,26 @@ export function RequestItem({ request, onPress }: RequestItemProps) {
             <Text style={styles.methodText}>{request.method}</Text>
           </View>
 
-          <View style={[styles.statusPill, { borderColor: codeColor }]}>
+          <View style={[styles.statusPill, { borderColor: codeColor, backgroundColor: palette.chipBg }]}>
             <Text style={[styles.statusCode, { color: codeColor }]}>
               {codeText}
             </Text>
           </View>
 
-          <Text style={styles.duration}>
+          <Text style={[styles.duration, { color: palette.subtleText }]}>
             {formatDuration(request.duration)}
           </Text>
 
-          <Text style={styles.time}>{formatTime(request.startedAt)}</Text>
+          <Text style={[styles.time, { color: palette.subtleText }]}>{formatTime(request.startedAt)}</Text>
         </View>
 
         {/* Host */}
-        <Text style={styles.host} numberOfLines={1}>
+        <Text style={[styles.host, { color: palette.text }]} numberOfLines={1}>
           {request.host}
         </Text>
 
         {/* Path */}
-        <Text style={styles.path} numberOfLines={1}>
+        <Text style={[styles.path, { color: palette.mutedText }]} numberOfLines={1}>
           {truncate(request.path + (request.queryString ? '?' + request.queryString : ''), 70)}
         </Text>
 
@@ -85,7 +89,7 @@ export function RequestItem({ request, onPress }: RequestItemProps) {
       </View>
 
       {/* Chevron */}
-      <Text style={styles.chevron}>›</Text>
+      <Text style={[styles.chevron, { color: palette.subtleText }]}>›</Text>
     </TouchableOpacity>
   );
 }
@@ -94,7 +98,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection:   'row',
     alignItems:      'stretch',
-    backgroundColor: '#FFFFFF',
     marginHorizontal: 12,
     marginVertical:   5,
     borderRadius:    10,
@@ -146,22 +149,18 @@ const styles = StyleSheet.create({
   },
   duration: {
     fontSize: 11,
-    color:    '#8A8A99',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   time: {
     fontSize:  11,
-    color:     '#8A8A99',
     marginLeft: 'auto',
   },
   host: {
     fontSize:   13,
-    color:      '#12121A',
     fontWeight: '500',
   },
   path: {
     fontSize:   12,
-    color:      '#6B6B7A',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   error: {
@@ -171,7 +170,6 @@ const styles = StyleSheet.create({
   },
   chevron: {
     fontSize:    20,
-    color:       '#C2C2CC',
     alignSelf:   'center',
     paddingRight: 12,
   },

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Logs & OS
+*.log
+.DS_Store
+
+# ─── Example app (React Native) — do not commit ───
+example-app/node_modules/
+
+# iOS (CocoaPods + Xcode)
+example-app/ios/.xcode.env.local
+example-app/ios/Pods/
+example-app/ios/build/
+example-app/ios/**/*.xcuserstate
+example-app/ios/**/xcuserdata/
+example-app/ios/DerivedData/
+
+# Android (Gradle + local SDK paths)
+example-app/android/build/
+example-app/android/app/build/
+example-app/android/.gradle/
+example-app/android/local.properties
+example-app/android/*.iml
+example-app/android/.idea/
+example-app/android/captures/
+
+# Metro / tooling cache
+example-app/.metro-health-check*
+.metro-health-check*
+
+# Tests / coverage (if added later)
+example-app/coverage/

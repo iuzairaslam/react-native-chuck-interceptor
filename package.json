@@ -1,6 +1,6 @@
 {
   "name": "@iuzairaslam/react-native-chuck-interceptor",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Network inspector for React Native (fetch, XHR, Axios). View requests, responses, headers, JSON and FormData in an in-app dashboard — inspired by Chucker.",
   "main": "src/index.ts",
   "module": "src/index.ts",
@@ -67,6 +67,7 @@
     }
   },
   "devDependencies": {
+    "@react-native-community/cli": "^20.1.3",
     "@types/react": "^18.0.0",
     "@types/react-native": "^0.73.0",
     "typescript": "^5.0.0"
@@ -82,5 +83,8 @@
   "homepage": "https://github.com/iuzairaslam/react-native-chuck-interceptor#readme",
   "bugs": {
     "url": "https://github.com/iuzairaslam/react-native-chuck-interceptor/issues"
+  },
+  "dependencies": {
+    "@react-native-clipboard/clipboard": "^1.16.3"
   }
 }

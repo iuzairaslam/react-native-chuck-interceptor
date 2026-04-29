@@ -80,6 +80,21 @@ export default function App() {
 
 That’s it—requests made through `fetch` or XHR (and most Axios setups) will be captured automatically.
 
+### Local example
+
+A standard runnable React Native app lives in `example-app/`.
+
+Run it with:
+
+```bash
+cd example-app
+npm install
+npx pod-install # iOS only
+npm run android
+# or
+npm run ios
+```
+
 ### Optional: persistent storage
 
 To persist requests across app restarts, install AsyncStorage:

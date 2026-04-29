@@ -15,6 +15,8 @@ import {
 import { ChuckerRequest } from '../types';
 import { statusColor, methodColor, truncate, formatDuration } from '../utils';
 import { useChuckerContext } from '../context';
+import { useChuckerPalette } from '../theme';
+import { CloseIcon } from './ChuckerIcons';
 
 interface NotificationItem {
   id:        string;
@@ -30,6 +32,7 @@ interface ChuckerNotificationProps {
 
 export function ChuckerNotification({ onPress }: ChuckerNotificationProps) {
   const { settings, requests } = useChuckerContext();
+  const palette = useChuckerPalette(settings);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const prevRequestsRef = useRef<ChuckerRequest[]>([]);
 
@@ -116,6 +119,7 @@ export function ChuckerNotification({ onPress }: ChuckerNotificationProps) {
         <NotificationBubble
           key={item.id}
           item={item}
+          palette={palette}
           onPress={() => {
             dismiss(item.id);
             onPress?.(item.id);
@@ -131,9 +135,10 @@ interface BubbleProps {
   item:      NotificationItem;
   onPress:   () => void;
   onDismiss: () => void;
+  palette: ReturnType<typeof useChuckerPalette>;
 }
 
-function NotificationBubble({ item, onPress, onDismiss }: BubbleProps) {
+function NotificationBubble({ item, onPress, onDismiss, palette }: BubbleProps) {
   const { request, anim } = item;
   const isPending = request.status === 'pending';
   const isFailed  = request.status === 'failed';
@@ -152,7 +157,7 @@ function NotificationBubble({ item, onPress, onDismiss }: BubbleProps) {
   const opacity = anim;
 
   return (
-    <Animated.View style={[styles.bubble, { opacity, transform: [{ translateY }] }]}>
+    <Animated.View style={[styles.bubble, { opacity, transform: [{ translateY }], backgroundColor: palette.surface }]}>
       <TouchableOpacity
         style={styles.bubbleInner}
         onPress={onPress}
@@ -167,7 +172,7 @@ function NotificationBubble({ item, onPress, onDismiss }: BubbleProps) {
             <View style={[styles.methodBadge, { backgroundColor: methodColor(request.method) }]}>
               <Text style={styles.methodText}>{request.method}</Text>
             </View>
-            <Text style={styles.statusText} numberOfLines={1}>
+            <Text style={[styles.statusText, { color: palette.text }]} numberOfLines={1}>
               {isPending
                 ? 'Pending…'
                 : isFailed
@@ -175,19 +180,19 @@ function NotificationBubble({ item, onPress, onDismiss }: BubbleProps) {
                 : `${statusCode}`}
             </Text>
             {!isPending && request.duration !== null && (
-              <Text style={styles.durationText}>
+              <Text style={[styles.durationText, { color: palette.subtleText }]}>
                 {formatDuration(request.duration)}
               </Text>
             )}
           </View>
-          <Text style={styles.urlText} numberOfLines={1}>
+          <Text style={[styles.urlText, { color: palette.mutedText }]} numberOfLines={1}>
             {truncate(request.host + request.path, 55)}
           </Text>
         </View>
 
         {/* Dismiss X */}
         <TouchableOpacity onPress={onDismiss} style={styles.dismissBtn} hitSlop={{ top: 8, left: 8, right: 8, bottom: 8 }}>
-          <Text style={styles.dismissText}>✕</Text>
+          <CloseIcon color={palette.subtleText} size={15} />
         </TouchableOpacity>
       </TouchableOpacity>
     </Animated.View>
@@ -266,9 +271,7 @@ const styles = StyleSheet.create({
   dismissBtn: {
     paddingHorizontal: 12,
     paddingVertical:    8,
-  },
-  dismissText: {
-    color:    '#607D8B',
-    fontSize: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

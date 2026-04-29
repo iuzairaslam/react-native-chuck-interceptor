@@ -16,6 +16,10 @@ import {
 } from 'react-native';
 import { useChuckerContext } from '../context';
 import { ChuckerSafeAreaView } from '../components/SafeArea';
+import { ChuckerPalette, useChuckerPalette } from '../theme';
+import { ChevronBackIcon } from '../components/ChuckerIcons';
+
+const HEADER_ICON_SIZE = 19;
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -23,6 +27,8 @@ interface SettingsScreenProps {
 
 export function SettingsScreen({ onBack }: SettingsScreenProps) {
   const { settings, updateSettings, requests, clearRequests } = useChuckerContext();
+  const palette = useChuckerPalette(settings);
+  const isDark = palette.bg === '#000000';
   const [filterInput, setFilterInput] = useState(settings.hostFilter.join(', '));
 
   function applyFilter() {
@@ -34,49 +40,55 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
   }
 
   return (
-    <ChuckerSafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent={false} />
+    <ChuckerSafeAreaView style={[styles.safe, { backgroundColor: palette.bg }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={palette.surface} translucent={false} />
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <Text style={styles.backText}>Back</Text>
+      <View style={[styles.header, { backgroundColor: palette.surface, borderBottomColor: palette.border }]}>
+        <TouchableOpacity
+          onPress={onBack}
+          style={[styles.iconBtn, { backgroundColor: palette.chipBg, borderColor: palette.border }]}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
+          <ChevronBackIcon color={palette.primary} size={HEADER_ICON_SIZE} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
-        <View style={{ width: 60 }} />
+        <Text style={[styles.headerTitle, { color: palette.text }]}>Settings</Text>
+        <View style={styles.iconBtnPlaceholder} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Stats */}
         <View style={styles.statsRow}>
-          <StatCard label="Total" value={String(requests.length)} />
-          <StatCard label="Success" value={String(requests.filter((r) => r.responseCode && r.responseCode < 400).length)} color="#4CAF50" />
-          <StatCard label="Errors"  value={String(requests.filter((r) => r.status === 'failed' || (r.responseCode && r.responseCode >= 400)).length)} color="#F44336" />
+          <StatCard label="Total" value={String(requests.length)} palette={palette} />
+          <StatCard label="Success" value={String(requests.filter((r) => r.responseCode && r.responseCode < 400).length)} color="#4CAF50" palette={palette} />
+          <StatCard label="Errors"  value={String(requests.filter((r) => r.status === 'failed' || (r.responseCode && r.responseCode >= 400)).length)} color="#F44336" palette={palette} />
         </View>
 
         {/* Notifications */}
-        <SectionHeader title="Notifications" />
+        <SectionHeader title="Notifications" palette={palette} />
         <SettingRow
           label="Show Notifications"
           description="Show a local notification for each request (requires permission)"
           value={settings.showNotification}
           onToggle={(v) => updateSettings({ showNotification: v })}
+          palette={palette}
         />
 
         {/* Debug mode */}
-        <SectionHeader title="Visibility" />
+        <SectionHeader title="Visibility" palette={palette} />
         <SettingRow
           label="Debug Mode Only"
           description="Only activate Chucker in __DEV__ builds"
           value={settings.showOnlyInDebug}
           onToggle={(v) => updateSettings({ showOnlyInDebug: v })}
+          palette={palette}
         />
 
         {/* Max requests */}
-        <SectionHeader title="Storage" />
-        <View style={styles.settingCard}>
+        <SectionHeader title="Storage" palette={palette} />
+        <View style={[styles.settingCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
           <View style={styles.settingLabelRow}>
-            <Text style={styles.settingLabel}>Max Requests</Text>
-            <Text style={styles.settingDesc}>Older requests are discarded when limit is reached</Text>
+            <Text style={[styles.settingLabel, { color: palette.text }]}>Max Requests</Text>
+            <Text style={[styles.settingDesc, { color: palette.mutedText }]}>Older requests are discarded when limit is reached</Text>
           </View>
           <View style={styles.stepperRow}>
             {[50, 100, 200, 500].map((val) => (
@@ -84,11 +96,12 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
                 key={val}
                 style={[
                   styles.stepBtn,
+                  { backgroundColor: palette.chipBg, borderColor: palette.border },
                   settings.maxRequests === val && styles.stepBtnActive,
                 ]}
                 onPress={() => updateSettings({ maxRequests: val })}
               >
-                <Text style={[styles.stepBtnText, settings.maxRequests === val && styles.stepBtnTextActive]}>
+                <Text style={[styles.stepBtnText, { color: palette.mutedText }, settings.maxRequests === val && styles.stepBtnTextActive]}>
                   {val}
                 </Text>
               </TouchableOpacity>
@@ -97,29 +110,29 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
         </View>
 
         {/* Host filter */}
-        <SectionHeader title="Filters" />
-        <View style={styles.settingCard}>
-          <Text style={styles.settingLabel}>Host Filter</Text>
-          <Text style={styles.settingDesc}>
+        <SectionHeader title="Filters" palette={palette} />
+        <View style={[styles.settingCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          <Text style={[styles.settingLabel, { color: palette.text }]}>Host Filter</Text>
+          <Text style={[styles.settingDesc, { color: palette.mutedText }]}>
             Comma-separated substrings. Only URLs matching will be captured.
             Leave empty to capture all.
           </Text>
           <TextInput
-            style={styles.filterInput}
+            style={[styles.filterInput, { color: palette.mutedText, borderColor: palette.border, backgroundColor: palette.surface }]}
             value={filterInput}
             onChangeText={setFilterInput}
             onBlur={applyFilter}
             placeholder="e.g. api.example.com, staging."
-            placeholderTextColor="#37474F"
+            placeholderTextColor={palette.subtleText}
             autoCapitalize="none"
             autoCorrect={false}
           />
         </View>
 
         {/* Notification duration */}
-        <SectionHeader title="Notification Duration" />
-        <View style={styles.settingCard}>
-          <Text style={styles.settingLabel}>Auto-dismiss after</Text>
+        <SectionHeader title="Notification Duration" palette={palette} />
+        <View style={[styles.settingCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+          <Text style={[styles.settingLabel, { color: palette.text }]}>Auto-dismiss after</Text>
           <View style={styles.stepperRow}>
             {[
               { label: '1s',  value: 1000  },
@@ -131,11 +144,12 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
                 key={value}
                 style={[
                   styles.stepBtn,
+                  { backgroundColor: palette.chipBg, borderColor: palette.border },
                   settings.notificationDuration === value && styles.stepBtnActive,
                 ]}
                 onPress={() => updateSettings({ notificationDuration: value })}
               >
-                <Text style={[styles.stepBtnText, settings.notificationDuration === value && styles.stepBtnTextActive]}>
+                <Text style={[styles.stepBtnText, { color: palette.mutedText }, settings.notificationDuration === value && styles.stepBtnTextActive]}>
                   {label}
                 </Text>
               </TouchableOpacity>
@@ -144,9 +158,9 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
         </View>
 
         {/* Danger zone */}
-        <SectionHeader title="Danger Zone" />
+        <SectionHeader title="Danger Zone" palette={palette} />
         <TouchableOpacity
-          style={styles.clearBtn}
+          style={[styles.clearBtn, { backgroundColor: palette.bg }]}
           onPress={clearRequests}
           activeOpacity={0.75}
         >
@@ -155,8 +169,8 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
 
         {/* About */}
         <View style={styles.about}>
-          <Text style={styles.aboutText}>react-native-chuck-interceptor v1.0.0</Text>
-          <Text style={styles.aboutSubtext}>
+          <Text style={[styles.aboutText, { color: palette.mutedText }]}>react-native-chuck-interceptor v1.0.0</Text>
+          <Text style={[styles.aboutSubtext, { color: palette.subtleText }]}>
             Inspired by Chucker Android &amp; Chucker Flutter
           </Text>
         </View>
@@ -165,15 +179,15 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
   );
 }
 
-function SectionHeader({ title }: { title: string }) {
-  return <Text style={styles.sectionHeader}>{title}</Text>;
+function SectionHeader({ title, palette }: { title: string; palette: ChuckerPalette }) {
+  return <Text style={[styles.sectionHeader, { color: palette.primary }]}>{title}</Text>;
 }
 
-function StatCard({ label, value, color }: { label: string; value: string; color?: string }) {
+function StatCard({ label, value, color, palette }: { label: string; value: string; color?: string; palette: ChuckerPalette }) {
   return (
-    <View style={styles.statCard}>
-      <Text style={styles.statLabel}>{label}</Text>
-      <Text style={[styles.statValue, color ? { color } : null]}>{value}</Text>
+    <View style={[styles.statCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+      <Text style={[styles.statLabel, { color: palette.subtleText }]}>{label}</Text>
+      <Text style={[styles.statValue, { color: color ?? palette.text }]}>{value}</Text>
     </View>
   );
 }
@@ -183,24 +197,26 @@ function SettingRow({
   description,
   value,
   onToggle,
+  palette,
 }: {
   label:       string;
   description: string;
   value:       boolean;
   onToggle:    (v: boolean) => void;
+  palette: ChuckerPalette;
 }) {
   return (
-    <View style={styles.settingCard}>
+    <View style={[styles.settingCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
       <View style={styles.settingLabelRow}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.settingLabel}>{label}</Text>
-          <Text style={styles.settingDesc}>{description}</Text>
+          <Text style={[styles.settingLabel, { color: palette.text }]}>{label}</Text>
+          <Text style={[styles.settingDesc, { color: palette.mutedText }]}>{description}</Text>
         </View>
         <Switch
           value={value}
           onValueChange={onToggle}
-          trackColor={{ false: '#1E2748', true: '#D97757' }}
-          thumbColor={value ? '#FFF' : '#546E7A'}
+          trackColor={{ false: palette.border, true: palette.primary }}
+          thumbColor={value ? '#FFFFFF' : palette.subtleText}
         />
       </View>
     </View>
@@ -221,16 +237,21 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E7E7EE',
   },
-  backBtn: {},
-  backText: {
-    color:      '#D97757',
-    fontSize:   14,
-    fontWeight: '700',
-    width:    60,
+  iconBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  iconBtnPlaceholder: {
+    width: 34,
+    height: 34,
   },
   headerTitle: {
     flex:       1,
-    fontSize:   17,
+    fontSize:   16,
     fontWeight: '700',
     color:      '#12121A',
     textAlign:  'center',

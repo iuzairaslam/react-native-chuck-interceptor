@@ -22,6 +22,9 @@ import { RequestItem } from '../components/RequestItem';
 import { filterRequests } from '../utils';
 import { ChuckerSafeAreaView } from '../components/SafeArea';
 import { useChuckerPalette } from '../theme';
+import { CloseIcon, SettingsIcon, TrashIcon } from '../components/ChuckerIcons';
+
+const HEADER_ICON_SIZE = 19;
 
 interface ChuckerListScreenProps {
   onSelectRequest: (request: ChuckerRequest) => void;
@@ -38,6 +41,7 @@ export function ChuckerListScreen({
 }: ChuckerListScreenProps) {
   const { requests, clearRequests, settings } = useChuckerContext();
   const palette = useChuckerPalette(settings);
+  const isDark = palette.bg === '#000000';
   const [search,     setSearch]     = useState('');
   const [filter,     setFilter]     = useState<FilterType>('all');
 
@@ -81,7 +85,7 @@ export function ChuckerListScreen({
 
   return (
     <ChuckerSafeAreaView style={[styles.safe, { backgroundColor: palette.bg }]}>
-      <StatusBar barStyle="dark-content" backgroundColor={palette.surface} translucent={false} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={palette.surface} translucent={false} />
 
       {/* Header */}
       <View style={[styles.header, { backgroundColor: palette.surface, borderBottomColor: palette.border }]}>
@@ -90,27 +94,39 @@ export function ChuckerListScreen({
           <Text style={[styles.subtitle, { color: palette.subtleText }]}>{requests.length}</Text>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={handleClear} style={styles.headerBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Text style={[styles.headerBtnText, { color: palette.mutedText }]}>Clear</Text>
+          <TouchableOpacity
+            onPress={handleClear}
+            style={[styles.iconBtn, { backgroundColor: palette.chipBg, borderColor: palette.border }]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <TrashIcon color={palette.mutedText} size={HEADER_ICON_SIZE} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={onOpenSettings} style={styles.headerBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Text style={[styles.headerBtnText, { color: palette.mutedText }]}>Settings</Text>
+          <TouchableOpacity
+            onPress={onOpenSettings}
+            style={[styles.iconBtn, { backgroundColor: palette.chipBg, borderColor: palette.border }]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <SettingsIcon color={palette.mutedText} size={HEADER_ICON_SIZE} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={styles.headerBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Text style={[styles.headerBtnText, { color: palette.mutedText }]}>Close</Text>
+          <TouchableOpacity
+            onPress={onClose}
+            style={[styles.iconBtn, { backgroundColor: palette.chipBg, borderColor: palette.border }]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <CloseIcon color={palette.mutedText} size={HEADER_ICON_SIZE} />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Search bar */}
       <View style={[styles.searchBar, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-        <Text style={[styles.searchIcon, { color: palette.subtleText }]}>Search</Text>
+        <Text style={[styles.searchIcon, { color: palette.subtleText }]}>⌕</Text>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: palette.text }]}
           value={search}
           onChangeText={setSearch}
           placeholder="Search URL, method, status..."
-          placeholderTextColor="#37474F"
+          placeholderTextColor={palette.subtleText}
           autoCapitalize="none"
           autoCorrect={false}
           clearButtonMode="while-editing"
@@ -183,18 +199,13 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E7E7EE',
     gap:             8,
   },
-  headerBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    backgroundColor: '#F7F7FA',
+  iconBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#E7E7EE',
-  },
-  headerBtnText: {
-    fontSize: 12,
-    color:    '#303047',
-    fontWeight: '600',
   },
   headerTitle: {
     flex:      1,
@@ -203,8 +214,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize:   16,
-    fontWeight: '700',
+    fontSize:   18,
+    fontWeight: '800',
     color:      '#12121A',
     letterSpacing: 0.3,
   },
@@ -224,9 +235,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     marginTop:       12,
     marginBottom:    8,
-    borderRadius:    10,
+    borderRadius:    14,
     paddingHorizontal: 12,
-    height:          42,
+    height:          46,
     borderWidth: 1,
     borderColor: '#E7E7EE',
   },
@@ -246,12 +257,12 @@ const styles = StyleSheet.create({
     flexDirection:   'row',
     paddingHorizontal: 12,
     gap:             6,
-    marginBottom:    8,
+    marginBottom:    12,
   },
   chip: {
     paddingHorizontal: 12,
     paddingVertical:    5,
-    borderRadius:      20,
+    borderRadius:      999,
     backgroundColor:   '#FFFFFF',
     borderWidth:       1,
     borderColor:       '#E7E7EE',
