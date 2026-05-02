@@ -28,26 +28,26 @@ export function getPalette(settings: Pick<ChuckerSettings, 'theme' | 'primaryCol
   if (mode === 'dark') {
     return {
       primary,
-      bg: '#0D0D1A',
-      surface: '#111128',
-      border: '#1E2748',
-      text: '#E0E0E0',
-      mutedText: '#B0BEC5',
-      subtleText: '#546E7A',
-      chipBg: '#1A1A2E',
+      bg: '#000000',
+      surface: '#111111',
+      border: '#3A3A3A',
+      text: '#FFFFFF',
+      mutedText: '#D0D0D0',
+      subtleText: '#9A9A9A',
+      chipBg: '#1F1F1F',
     };
   }
 
   // light
   return {
     primary,
-    bg: '#F7F7FA',
+    bg: '#FFFFFF',
     surface: '#FFFFFF',
-    border: '#E7E7EE',
-    text: '#12121A',
-    mutedText: '#303047',
-    subtleText: '#8A8A99',
-    chipBg: '#F7F7FA',
+    border: '#E4E4E4',
+    text: '#121212',
+    mutedText: '#2B2B2B',
+    subtleText: '#666666',
+    chipBg: '#F2F2F2',
   };
 }
 

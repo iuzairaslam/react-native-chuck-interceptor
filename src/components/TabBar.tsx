@@ -4,6 +4,8 @@
 
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useChuckerContext } from '../context';
+import { useChuckerPalette } from '../theme';
 
 export interface TabItem {
   key:   string;
@@ -17,18 +19,27 @@ interface TabBarProps {
 }
 
 export function TabBar({ tabs, activeKey, onChange }: TabBarProps) {
+  const { settings } = useChuckerContext();
+  const palette = useChuckerPalette(settings);
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: palette.surface, borderBottomColor: palette.border }]}>
       {tabs.map((tab) => {
         const isActive = tab.key === activeKey;
         return (
           <TouchableOpacity
             key={tab.key}
-            style={[styles.tab, isActive && styles.tabActive]}
+            style={[styles.tab, isActive && { backgroundColor: palette.chipBg }]}
             onPress={() => onChange(tab.key)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.label, isActive && styles.labelActive]}>
+            <Text
+              style={[
+                styles.label,
+                { color: palette.subtleText },
+                isActive && { color: palette.text },
+              ]}
+            >
               {tab.label}
             </Text>
           </TouchableOpacity>
@@ -54,16 +65,8 @@ const styles = StyleSheet.create({
     alignItems:      'center',
     borderRadius: 10,
   },
-  tabActive: {
-    backgroundColor: '#F7F7FA',
-  },
   label: {
     fontSize:   13,
-    color:      '#6B6B7A',
     fontWeight: '500',
-  },
-  labelActive: {
-    color:      '#12121A',
-    fontWeight: '700',
   },
 });

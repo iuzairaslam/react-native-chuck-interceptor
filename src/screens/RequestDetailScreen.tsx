@@ -5,19 +5,25 @@
 
 import React, { useState } from 'react';
 import {
+  Alert,
   Platform,
   ScrollView,
   Share,
   StatusBar,
   StyleSheet,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import { ChuckerRequest } from '../types';
+import { useChuckerContext } from '../context';
+import { ChuckerPalette, useChuckerPalette } from '../theme';
 import { TabBar, TabItem } from '../components/TabBar';
 import { JsonTreeView } from '../components/JsonTreeView';
 import { ChuckerSafeAreaView } from '../components/SafeArea';
+import { ChevronBackIcon, ShareIcon } from '../components/ChuckerIcons';
 import {
   formatBytes,
   formatDuration,
@@ -26,6 +32,8 @@ import {
   methodColor,
   statusColor,
 } from '../utils';
+
+const HEADER_ICON_SIZE = 19;
 
 interface RequestDetailScreenProps {
   request: ChuckerRequest;
@@ -41,6 +49,9 @@ const TABS: TabItem[] = [
 
 export function RequestDetailScreen({ request, onBack }: RequestDetailScreenProps) {
   const [activeTab, setActiveTab] = useState<string>('overview');
+  const { settings } = useChuckerContext();
+  const palette = useChuckerPalette(settings);
+  const isDark = palette.bg === '#000000';
 
   const handleShare = async () => {
     const text = buildShareText(request);
@@ -58,24 +69,48 @@ export function RequestDetailScreen({ request, onBack }: RequestDetailScreenProp
     ? '#78909C'
     : statusColor(statusCode);
 
+  const showCopiedMessage = () => {
+    const message = 'Link copied to clipboard';
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(message, ToastAndroid.SHORT);
+      return;
+    }
+    Alert.alert('Copied', message);
+  };
+
+  const copyIfLink = (value: string) => {
+    const link = extractFirstLink(value);
+    if (!link) return;
+    Clipboard.setString(link);
+    showCopiedMessage();
+  };
+
   return (
-    <ChuckerSafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent={false} />
+    <ChuckerSafeAreaView style={[styles.safe, { backgroundColor: palette.bg }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={palette.surface} translucent={false} />
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <Text style={styles.backText}>Back</Text>
+      <View style={[styles.header, { backgroundColor: palette.surface, borderBottomColor: palette.border }]}>
+        <TouchableOpacity
+          onPress={onBack}
+          style={[styles.iconBtn, { backgroundColor: palette.chipBg, borderColor: palette.border }]}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
+          <ChevronBackIcon color={palette.primary} size={HEADER_ICON_SIZE} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>
+        <Text style={[styles.headerTitle, { color: palette.mutedText }]} numberOfLines={1}>
           {request.method} {request.path}
         </Text>
-        <TouchableOpacity onPress={handleShare} style={styles.shareBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <Text style={styles.shareText}>Share</Text>
+        <TouchableOpacity
+          onPress={handleShare}
+          style={[styles.iconBtn, { backgroundColor: palette.chipBg, borderColor: palette.border }]}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
+          <ShareIcon color={palette.primary} size={HEADER_ICON_SIZE} />
         </TouchableOpacity>
       </View>
 
       {/* Status badge row */}
-      <View style={styles.statusRow}>
+      <View style={[styles.statusRow, { backgroundColor: palette.surface, borderBottomColor: palette.border }]}>
         <View style={[styles.methodBadge, { backgroundColor: methodColor(request.method) }]}>
           <Text style={styles.methodText}>{request.method}</Text>
         </View>
@@ -90,7 +125,7 @@ export function RequestDetailScreen({ request, onBack }: RequestDetailScreenProp
               : 'COMPLETE'}
           </Text>
         </View>
-        <Text style={styles.duration}>
+          <Text style={[styles.duration, { color: palette.subtleText }]}>
           {formatDuration(request.duration)}
         </Text>
       </View>
@@ -100,10 +135,17 @@ export function RequestDetailScreen({ request, onBack }: RequestDetailScreenProp
 
       {/* Tab content */}
       <View style={styles.tabContent}>
-        {activeTab === 'overview' && <OverviewTab request={request} codeColor={codeColor} />}
-        {activeTab === 'request'  && <BodyTab body={request.requestBody}  label="Request Body"  />}
-        {activeTab === 'response' && <BodyTab body={request.responseBody} label="Response Body" />}
-        {activeTab === 'headers'  && <HeadersTab request={request} />}
+        {activeTab === 'overview' && (
+          <OverviewTab
+            request={request}
+            codeColor={codeColor}
+            palette={palette}
+            onCopyLink={copyIfLink}
+          />
+        )}
+        {activeTab === 'request'  && <BodyTab body={request.requestBody} label="Request Body" palette={palette} />}
+        {activeTab === 'response' && <BodyTab body={request.responseBody} label="Response Body" palette={palette} />}
+        {activeTab === 'headers'  && <HeadersTab request={request} palette={palette} onCopyLink={copyIfLink} />}
       </View>
     </ChuckerSafeAreaView>
   );
@@ -111,40 +153,50 @@ export function RequestDetailScreen({ request, onBack }: RequestDetailScreenProp
 
 // ─── Overview Tab ─────────────────────────────────────────────────────────────
 
-function OverviewTab({ request, codeColor }: { request: ChuckerRequest; codeColor: string }) {
+function OverviewTab({
+  request,
+  codeColor,
+  palette,
+  onCopyLink,
+}: {
+  request: ChuckerRequest;
+  codeColor: string;
+  palette: ChuckerPalette;
+  onCopyLink: (value: string) => void;
+}) {
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-      <Section title="URL">
-        <MonoText>{request.url}</MonoText>
+      <Section title="URL" palette={palette}>
+        <MonoText palette={palette} onPress={() => onCopyLink(request.url)}>{request.url}</MonoText>
       </Section>
 
-      <Section title="Timing">
-        <Row label="Start time"  value={formatTime(request.startedAt)} />
-        <Row label="Duration"    value={formatDuration(request.duration)} />
+      <Section title="Timing" palette={palette}>
+        <Row label="Start time" value={formatTime(request.startedAt)} palette={palette} />
+        <Row label="Duration" value={formatDuration(request.duration)} palette={palette} />
         {request.completedAt && (
-          <Row label="End time" value={formatTime(request.completedAt)} />
+          <Row label="End time" value={formatTime(request.completedAt)} palette={palette} />
         )}
       </Section>
 
-      <Section title="Response">
-        <Row label="Status"       value={request.responseCode !== null ? `${request.responseCode}` : '—'} valueColor={codeColor} />
-        <Row label="Message"      value={request.responseMessage ?? '—'} />
-        <Row label="Content-Type" value={request.responseContentType ?? '—'} />
-        <Row label="Body size"    value={formatBytes(request.responseBodySize)} />
+      <Section title="Response" palette={palette}>
+        <Row label="Status" value={request.responseCode !== null ? `${request.responseCode}` : '—'} valueColor={codeColor} palette={palette} />
+        <Row label="Message" value={request.responseMessage ?? '—'} palette={palette} />
+        <Row label="Content-Type" value={request.responseContentType ?? '—'} palette={palette} />
+        <Row label="Body size" value={formatBytes(request.responseBodySize)} palette={palette} />
       </Section>
 
-      <Section title="Request">
-        <Row label="Protocol"   value={request.protocol.toUpperCase()} />
-        <Row label="Host"       value={request.host} />
-        <Row label="Path"       value={request.path} />
+      <Section title="Request" palette={palette}>
+        <Row label="Protocol" value={request.protocol.toUpperCase()} palette={palette} />
+        <Row label="Host" value={request.host} palette={palette} />
+        <Row label="Path" value={request.path} palette={palette} />
         {request.queryString && (
-          <Row label="Query" value={request.queryString} />
+          <Row label="Query" value={request.queryString} palette={palette} />
         )}
-        <Row label="Body size" value={formatBytes(request.requestBodySize)} />
+        <Row label="Body size" value={formatBytes(request.requestBodySize)} palette={palette} />
       </Section>
 
       {request.error && (
-        <Section title="Error">
+        <Section title="Error" palette={palette}>
           <Text style={styles.errorText}>{request.error}</Text>
         </Section>
       )}
@@ -154,7 +206,7 @@ function OverviewTab({ request, codeColor }: { request: ChuckerRequest; codeColo
 
 // ─── Body Tab ─────────────────────────────────────────────────────────────────
 
-function BodyTab({ body, label }: { body: string | null; label: string }) {
+function BodyTab({ body, label, palette }: { body: string | null; label: string; palette: ChuckerPalette }) {
   const [mode, setMode] = useState<'pretty' | 'raw'>('pretty');
   const hasJson = isJson(body);
 
@@ -162,28 +214,36 @@ function BodyTab({ body, label }: { body: string | null; label: string }) {
     return (
       <View style={styles.emptyBody}>
         <Text style={styles.emptyBodyIcon}>📭</Text>
-        <Text style={styles.emptyBodyText}>No {label}</Text>
+        <Text style={[styles.emptyBodyText, { color: palette.subtleText }]}>No {label}</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.bodyContainer}>
+    <View style={[styles.bodyContainer, { backgroundColor: palette.bg }]}>
       {hasJson && (
-        <View style={styles.modeRow}>
+        <View style={[styles.modeRow, { borderBottomColor: palette.border, backgroundColor: palette.surface }]}>
           <TouchableOpacity
-            style={[styles.modeBtn, mode === 'pretty' && styles.modeBtnActive]}
+            style={[
+              styles.modeBtn,
+              { backgroundColor: palette.chipBg },
+              mode === 'pretty' && { backgroundColor: palette.primary },
+            ]}
             onPress={() => setMode('pretty')}
           >
-            <Text style={[styles.modeBtnText, mode === 'pretty' && styles.modeBtnTextActive]}>
+            <Text style={[styles.modeBtnText, { color: palette.mutedText }, mode === 'pretty' && styles.modeBtnTextActive]}>
               Tree
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.modeBtn, mode === 'raw' && styles.modeBtnActive]}
+            style={[
+              styles.modeBtn,
+              { backgroundColor: palette.chipBg },
+              mode === 'raw' && { backgroundColor: palette.primary },
+            ]}
             onPress={() => setMode('raw')}
           >
-            <Text style={[styles.modeBtnText, mode === 'raw' && styles.modeBtnTextActive]}>
+            <Text style={[styles.modeBtnText, { color: palette.mutedText }, mode === 'raw' && styles.modeBtnTextActive]}>
               Raw
             </Text>
           </TouchableOpacity>
@@ -195,7 +255,7 @@ function BodyTab({ body, label }: { body: string | null; label: string }) {
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator>
             <ScrollView showsVerticalScrollIndicator>
-              <Text style={styles.rawBody}>{body}</Text>
+              <Text style={[styles.rawBody, { color: palette.mutedText }]}>{body}</Text>
             </ScrollView>
           </ScrollView>
         )}
@@ -206,24 +266,32 @@ function BodyTab({ body, label }: { body: string | null; label: string }) {
 
 // ─── Headers Tab ─────────────────────────────────────────────────────────────
 
-function HeadersTab({ request }: { request: ChuckerRequest }) {
+function HeadersTab({
+  request,
+  palette,
+  onCopyLink,
+}: {
+  request: ChuckerRequest;
+  palette: ChuckerPalette;
+  onCopyLink: (value: string) => void;
+}) {
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-      <Section title="Request Headers">
+      <Section title="Request Headers" palette={palette}>
         {Object.keys(request.requestHeaders).length === 0 ? (
-          <Text style={styles.noHeaders}>No request headers</Text>
+          <Text style={[styles.noHeaders, { color: palette.subtleText }]}>No request headers</Text>
         ) : (
           Object.entries(request.requestHeaders).map(([k, v]) => (
-            <HeaderRow key={k} name={k} value={v} />
+            <HeaderRow key={k} name={k} value={v} palette={palette} onCopyLink={onCopyLink} />
           ))
         )}
       </Section>
-      <Section title="Response Headers">
+      <Section title="Response Headers" palette={palette}>
         {Object.keys(request.responseHeaders).length === 0 ? (
-          <Text style={styles.noHeaders}>No response headers</Text>
+          <Text style={[styles.noHeaders, { color: palette.subtleText }]}>No response headers</Text>
         ) : (
           Object.entries(request.responseHeaders).map(([k, v]) => (
-            <HeaderRow key={k} name={k} value={v} />
+            <HeaderRow key={k} name={k} value={v} palette={palette} onCopyLink={onCopyLink} />
           ))
         )}
       </Section>
@@ -233,11 +301,11 @@ function HeadersTab({ request }: { request: ChuckerRequest }) {
 
 // ─── Reusable sub-components ──────────────────────────────────────────────────
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children, palette }: { title: string; children: React.ReactNode; palette: ChuckerPalette }) {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.sectionBody}>{children}</View>
+      <Text style={[styles.sectionTitle, { color: palette.primary }]}>{title}</Text>
+      <View style={[styles.sectionBody, { backgroundColor: palette.surface, borderColor: palette.border }]}>{children}</View>
     </View>
   );
 }
@@ -246,32 +314,74 @@ function Row({
   label,
   value,
   valueColor,
+  palette,
 }: {
   label:       string;
   value:       string;
   valueColor?: string;
+  palette: ChuckerPalette;
 }) {
   return (
     <View style={styles.row}>
-      <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={[styles.rowValue, valueColor ? { color: valueColor } : null]} selectable>
+      <Text style={[styles.rowLabel, { color: palette.subtleText }]}>{label}</Text>
+      <Text style={[styles.rowValue, { color: valueColor ?? palette.mutedText }]} selectable>
         {value}
       </Text>
     </View>
   );
 }
 
-function MonoText({ children }: { children: string }) {
-  return <Text style={styles.monoText} selectable>{children}</Text>;
+function MonoText({
+  children,
+  palette,
+  onPress,
+}: {
+  children: string;
+  palette: ChuckerPalette;
+  onPress?: () => void;
+}) {
+  const copyable = !!onPress;
+  return (
+    <TouchableOpacity disabled={!copyable} onPress={onPress} activeOpacity={0.75}>
+      <Text style={[styles.monoText, { color: copyable ? palette.primary : palette.mutedText }]} selectable>
+        {children}
+      </Text>
+    </TouchableOpacity>
+  );
 }
 
-function HeaderRow({ name, value }: { name: string; value: string }) {
+function HeaderRow({
+  name,
+  value,
+  palette,
+  onCopyLink,
+}: {
+  name: string;
+  value: string;
+  palette: ChuckerPalette;
+  onCopyLink: (value: string) => void;
+}) {
+  const copyable = hasLink(value);
   return (
-    <View style={styles.headerRow}>
-      <Text style={styles.headerName}>{name}</Text>
-      <Text style={styles.headerValue} selectable>{value}</Text>
-    </View>
+    <TouchableOpacity
+      style={styles.headerRow}
+      disabled={!copyable}
+      onPress={() => onCopyLink(value)}
+      activeOpacity={0.75}
+    >
+      <Text style={[styles.headerName, { color: palette.mutedText }]}>{name}</Text>
+      <Text style={[styles.headerValue, { color: copyable ? palette.primary : palette.subtleText }]} selectable>{value}</Text>
+    </TouchableOpacity>
   );
+}
+
+function hasLink(value: string): boolean {
+  return /https?:\/\/[^\s,]+/i.test(value);
+}
+
+function extractFirstLink(value: string): string | null {
+  const match = value.match(/https?:\/\/[^\s,]+/i);
+  return match ? match[0] : null;
 }
 
 // ─── Share helper ─────────────────────────────────────────────────────────────
@@ -326,30 +436,21 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E7E7EE',
     gap:               8,
   },
-  backBtn: {
-    minWidth: 60,
-  },
-  backText: {
-    color:      '#D97757',
-    fontSize:   14,
-    fontWeight: '700',
+  iconBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
   },
   headerTitle: {
     flex:       1,
-    fontSize:   14,
-    fontWeight: '600',
+    fontSize:   13,
+    fontWeight: '700',
     color:      '#303047',
     textAlign:  'center',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-  },
-  shareBtn: {
-    minWidth: 60,
-    alignItems: 'flex-end',
-  },
-  shareText: {
-    color:      '#D97757',
-    fontSize:   14,
-    fontWeight: '700',
   },
   statusRow: {
     flexDirection:     'row',
